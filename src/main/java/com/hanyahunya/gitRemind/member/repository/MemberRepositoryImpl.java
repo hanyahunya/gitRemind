@@ -1,4 +1,4 @@
-package com.hanyahunya.gitRemind.repository;
+package com.hanyahunya.gitRemind.member.repository;
 
 import com.hanyahunya.gitRemind.entity.Member;
 import org.springframework.jdbc.core.JdbcTemplate;
