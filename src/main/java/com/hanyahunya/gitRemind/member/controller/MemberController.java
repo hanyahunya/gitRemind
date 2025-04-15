@@ -1,7 +1,8 @@
-package com.hanyahunya.gitRemind.controller;
+package com.hanyahunya.gitRemind.member.controller;
 
-import com.hanyahunya.gitRemind.dto.JoinMemberDto;
-import com.hanyahunya.gitRemind.service.MemberService;
+import com.hanyahunya.gitRemind.ResponseDto;
+import com.hanyahunya.gitRemind.member.dto.JoinMemberDto;
+import com.hanyahunya.gitRemind.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -16,10 +17,10 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/join")
-    public ResponseEntity<Void> join(@RequestBody JoinMemberDto joinMemberDto) {
-        boolean success = memberService.join(joinMemberDto);
-        if (success) {
-            return ResponseEntity.ok().build();
+    public ResponseEntity<ResponseDto<String>> join(@RequestBody JoinMemberDto joinMemberDto) {
+        ResponseDto<String> responseDto = memberService.join(joinMemberDto);
+        if (responseDto.isSuccess()) {
+            return ResponseEntity.ok().body(responseDto);
         } else {
             return ResponseEntity.badRequest().build();
         }
