@@ -1,6 +1,6 @@
 package com.hanyahunya.gitRemind.member.service;
 
-import com.hanyahunya.gitRemind.entity.Member;
+import com.hanyahunya.gitRemind.member.entity.Member;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

@@ -36,7 +36,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/**").permitAll() // 認証なしにアクセス可能
+                                .requestMatchers("/member/join", "/member/login").permitAll() // 認証なしにアクセス可能
                                 .anyRequest().authenticated() // 他のリクエストは認証必要
                 )
                 .formLogin(AbstractHttpConfigurer::disable)

@@ -13,14 +13,14 @@ public class ResponseDto <D> {
     public static <D> ResponseDto<D> success(String message, D data) {
         return ResponseDto.set(true, message, data);
     }
-    public static ResponseDto<Void> success(String message) {
+    public static <D> ResponseDto<D> success(String message) {
         return ResponseDto.set(true, message, null);
     }
 
     public static <D> ResponseDto<D> fail(String message, D data) {
         return ResponseDto.set(false, message, data);
     }
-    public static ResponseDto<Void> fail(String message) {
+    public static <D> ResponseDto<D> fail(String message) {
         return ResponseDto.set(false, message, null);
     }
 }
