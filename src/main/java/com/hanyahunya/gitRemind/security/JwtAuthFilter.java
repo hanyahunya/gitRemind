@@ -25,7 +25,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         // JwtAuthFilterはspring security認証の前に実行されるため、多重ifで囲む
-        if (authHeader != null && !authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             if (tokenService.validateToken(token)) {
                 Claims claims = tokenService.getClaims(token);

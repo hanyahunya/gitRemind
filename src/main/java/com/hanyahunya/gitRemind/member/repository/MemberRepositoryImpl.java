@@ -1,10 +1,14 @@
 package com.hanyahunya.gitRemind.member.repository;
 
-import com.hanyahunya.gitRemind.entity.Member;
+import com.hanyahunya.gitRemind.member.entity.Member;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class MemberRepositoryImpl implements  MemberRepository{
     private final JdbcTemplate jdbcTemplate;
@@ -27,4 +31,38 @@ public class MemberRepositoryImpl implements  MemberRepository{
                 });
         return updated > 0;
     }
+
+    @Override
+    public Optional<Member> findMemberByMid(String mid) {
+        final String sql = "SELECT email, git_addr FROM member WHERE mid = ?";
+        List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), mid);
+        return memberList.stream().findFirst();
+    }
+
+    @Override
+    public Optional<Member> validateMember(Member member) {
+        final String sql = "SELECT mid FROM member WHERE id = ? AND pw = ?";
+        List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), member.getId(), member.getPw());
+        return memberList.stream().findFirst();
+    }
+
+
+
+    private RowMapper<Member> memberRowMapper (String sql) {
+        String sqlColumns = sql.substring(0, sql.toLowerCase().indexOf("from"));
+        return (rs, rowNum) -> {
+            Member member = Member.builder().build();
+            if(sqlColumns.contains("mid")) {
+                member.setMid(rs.getString("mid"));
+            }
+            if(sqlColumns.contains("email")) {
+                member.setEmail(rs.getString("email"));
+            }
+            if(sqlColumns.contains("git_addr")) {
+                member.setGit_addr(rs.getString("git_addr"));
+            }
+            return member;
+        };
+    }
+
 }

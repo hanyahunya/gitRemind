@@ -1,4 +1,4 @@
-package com.hanyahunya.gitRemind.entity;
+package com.hanyahunya.gitRemind.member.entity;
 
 import lombok.Builder;
 import lombok.Getter;
