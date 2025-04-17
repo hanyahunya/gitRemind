@@ -1,6 +1,6 @@
 package com.hanyahunya.gitRemind.member.service;
 
-import com.hanyahunya.gitRemind.ResponseDto;
+import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.dto.JoinRequestDto;
 import com.hanyahunya.gitRemind.member.dto.JwtResponseDto;
 import com.hanyahunya.gitRemind.member.dto.LoginRequestDto;
@@ -25,4 +25,10 @@ public interface MemberService {
      * @return MemberInfoResponseDto.email, .git_addr
      */
     ResponseDto<MemberInfoResponseDto> getInfo(String mid);
+
+    ResponseDto<Void> resetPassword();
+
+    ResponseDto<Void> deleteMember();
+
+    ResponseDto<Void> updateMember();
 }

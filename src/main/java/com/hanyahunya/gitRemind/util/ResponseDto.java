@@ -1,4 +1,4 @@
-package com.hanyahunya.gitRemind;
+package com.hanyahunya.gitRemind.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
