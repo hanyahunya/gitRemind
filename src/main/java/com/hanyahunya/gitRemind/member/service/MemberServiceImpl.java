@@ -1,6 +1,6 @@
 package com.hanyahunya.gitRemind.member.service;
 
-import com.hanyahunya.gitRemind.ResponseDto;
+import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.dto.JoinRequestDto;
 import com.hanyahunya.gitRemind.member.dto.JwtResponseDto;
 import com.hanyahunya.gitRemind.member.dto.LoginRequestDto;
@@ -9,7 +9,6 @@ import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -48,5 +47,20 @@ public class MemberServiceImpl implements MemberService {
                         ResponseDto.success("ユーザー情報ロード成功", MemberInfoResponseDto.set(member.getEmail(), member.getGit_addr()))
                 )
                 .orElseGet(() -> ResponseDto.fail("ユーザー情報ロード失敗"));
+    }
+
+    @Override
+    public ResponseDto<Void> resetPassword() {
+        return null;
+    }
+
+    @Override
+    public ResponseDto<Void> deleteMember() {
+        return null;
+    }
+
+    @Override
+    public ResponseDto<Void> updateMember() {
+        return null;
     }
 }
