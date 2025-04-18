@@ -15,14 +15,14 @@ public class JoinRequestDto {
     @NotNull
     private String email;
     @NotNull
-    private String git_addr;
+    private String git_username;
 
     public Member dtoToEntity() {
         return Member.builder()
                 .id(this.id)
                 .pw(this.pw)
                 .email(this.email)
-                .git_addr(this.git_addr)
+                .git_username(this.git_username)
                 .build();
     }
 }

@@ -8,7 +8,6 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public class MemberRepositoryImpl implements  MemberRepository{
     private final JdbcTemplate jdbcTemplate;
@@ -18,7 +17,7 @@ public class MemberRepositoryImpl implements  MemberRepository{
 
     @Override
     public boolean saveMember(Member member) {
-        final String sql = "INSERT INTO member(mid, id, pw, email, git_addr) VALUES (?, ?, ?, ?, ?)";
+        final String sql = "INSERT INTO member(mid, id, pw, email, git_username) VALUES (?, ?, ?, ?, ?)";
         int updated = jdbcTemplate.update(
                 conn -> {
                     PreparedStatement ps = conn.prepareStatement(sql);
@@ -26,7 +25,7 @@ public class MemberRepositoryImpl implements  MemberRepository{
                     ps.setString(2, member.getId());
                     ps.setString(3, member.getPw());
                     ps.setString(4, member.getEmail());
-                    ps.setString(5, member.getGit_addr());
+                    ps.setString(5, member.getGit_username());
                     return ps;
                 });
         return updated > 0;
@@ -34,7 +33,7 @@ public class MemberRepositoryImpl implements  MemberRepository{
 
     @Override
     public Optional<Member> findMemberByMid(String mid) {
-        final String sql = "SELECT email, git_addr FROM member WHERE mid = ?";
+        final String sql = "SELECT email, git_username, token_version FROM member WHERE mid = ?";
         List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), mid);
         return memberList.stream().findFirst();
     }
@@ -58,8 +57,11 @@ public class MemberRepositoryImpl implements  MemberRepository{
             if(sqlColumns.contains("email")) {
                 member.setEmail(rs.getString("email"));
             }
-            if(sqlColumns.contains("git_addr")) {
-                member.setGit_addr(rs.getString("git_addr"));
+            if(sqlColumns.contains("git_username")) {
+                member.setGit_username(rs.getString("git_username"));
+            }
+            if (sqlColumns.contains("token_version")) {
+                member.setToken_version(rs.getInt("token_version"));
             }
             return member;
         };

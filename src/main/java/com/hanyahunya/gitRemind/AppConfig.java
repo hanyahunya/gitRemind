@@ -33,13 +33,18 @@ public class AppConfig {
     }
 
     @Bean
+    public PasswordService passwordService() {
+        return new PasswordServiceImpl();
+    }
+
+    @Bean
     public MemberRepository memberRepository() {
         return new MemberRepositoryImpl(dataSource);
     }
 
     @Bean
     public TokenService tokenService() {
-        return new JwtTokenService();
+        return new JwtTokenService(memberRepository());
     }
 
     @Bean

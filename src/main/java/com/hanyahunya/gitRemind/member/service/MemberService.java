@@ -26,8 +26,6 @@ public interface MemberService {
      */
     ResponseDto<MemberInfoResponseDto> getInfo(String mid);
 
-    ResponseDto<Void> resetPassword();
-
     ResponseDto<Void> deleteMember();
 
     ResponseDto<Void> updateMember();

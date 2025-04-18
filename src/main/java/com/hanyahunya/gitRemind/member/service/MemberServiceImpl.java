@@ -21,6 +21,7 @@ public class MemberServiceImpl implements MemberService {
         UUID uuid = UUID.randomUUID();
         Member member = joinRequestDto.dtoToEntity();
         member.setMid(uuid.toString());
+        // todo encodePw(04.18)
         boolean success = memberRepository.saveMember(member);
         if (success) {
             String token = tokenService.generateToken(member);
@@ -32,10 +33,12 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public ResponseDto<JwtResponseDto> login(LoginRequestDto loginRequestDto) {
+        // todo encodePw(04.18)
+//        loginRequestDto.getPw();
+//        loginRequestDto.setPw("");
         return memberRepository.validateMember(loginRequestDto.dtoToEntity())
                 .map(member ->
-                    ResponseDto.success("ログイン成功", JwtResponseDto.set(tokenService.generateToken(member))
-                    )
+                        ResponseDto.success("ログイン成功", JwtResponseDto.set(tokenService.generateToken(member)))
                 )
                 .orElseGet(() -> ResponseDto.fail("ログイン失敗"));
     }
@@ -44,14 +47,9 @@ public class MemberServiceImpl implements MemberService {
     public ResponseDto<MemberInfoResponseDto> getInfo(String mid) {
         return memberRepository.findMemberByMid(mid)
                 .map(member ->
-                        ResponseDto.success("ユーザー情報ロード成功", MemberInfoResponseDto.set(member.getEmail(), member.getGit_addr()))
+                        ResponseDto.success("ユーザー情報ロード成功", MemberInfoResponseDto.set(member.getEmail(), member.getGit_username()))
                 )
                 .orElseGet(() -> ResponseDto.fail("ユーザー情報ロード失敗"));
-    }
-
-    @Override
-    public ResponseDto<Void> resetPassword() {
-        return null;
     }
 
     @Override
