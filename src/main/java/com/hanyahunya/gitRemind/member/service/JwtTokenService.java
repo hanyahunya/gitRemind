@@ -1,9 +1,7 @@
 package com.hanyahunya.gitRemind.member.service;
 
-import com.hanyahunya.gitRemind.member.dto.MemberInfoResponseDto;
 import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
-import com.hanyahunya.gitRemind.util.ResponseDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -34,10 +32,10 @@ public class JwtTokenService implements TokenService {
 
     @Override
     public String generateToken(Member member) {
-        Member member1 = getMemberByMid(member.getMid());
+        Member dbMember = getMemberByMid(member.getMid());
         return Jwts.builder()
                 .claim("mid", member.getMid())
-                .claim("token_version", member1.getToken_version())
+                .claim("token_version", dbMember.getToken_version())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key)
@@ -49,10 +47,10 @@ public class JwtTokenService implements TokenService {
         Claims claims = getClaims(token);
         String mid = claims.get("mid", String.class);
         Integer tokenVersion = claims.get("token_version", Integer.class);
-        Member member = getMemberByMid(mid);
+        Member dbMember = getMemberByMid(mid);
 
         // Tokenの有効期限とTokenVersionの一致を確認
-        return (!isTokenExpired(claims.getExpiration()) && tokenVersion.equals(member.getToken_version()));
+        return (!isTokenExpired(claims.getExpiration()) && tokenVersion.equals(dbMember.getToken_version()));
     }
 
     @Override

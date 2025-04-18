@@ -40,12 +40,10 @@ public class MemberRepositoryImpl implements  MemberRepository{
 
     @Override
     public Optional<Member> validateMember(Member member) {
-        final String sql = "SELECT mid FROM member WHERE id = ? AND pw = ?";
-        List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), member.getId(), member.getPw());
+        final String sql = "SELECT pw, mid FROM member WHERE id = ?";
+        List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), member.getId());
         return memberList.stream().findFirst();
     }
-
-
 
     private RowMapper<Member> memberRowMapper (String sql) {
         String sqlColumns = sql.substring(0, sql.toLowerCase().indexOf("from"));
@@ -53,6 +51,9 @@ public class MemberRepositoryImpl implements  MemberRepository{
             Member member = Member.builder().build();
             if(sqlColumns.contains("mid")) {
                 member.setMid(rs.getString("mid"));
+            }
+            if (sqlColumns.contains("pw")) {
+                member.setPw(rs.getString("pw"));
             }
             if(sqlColumns.contains("email")) {
                 member.setEmail(rs.getString("email"));
