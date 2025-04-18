@@ -1,6 +1,5 @@
 package com.hanyahunya.gitRemind.infrastructure.email;
 
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -22,7 +22,6 @@ import static com.hanyahunya.gitRemind.util.ResponseUtil.toResponse;
 @RequestMapping("/member")
 public class MemberController {
     private final MemberService memberService;
-    private final AuthCodeService authCodeService;
 
     @PostMapping("/join")
     public ResponseEntity<ResponseDto<JwtResponseDto>> join(@RequestBody @Valid JoinRequestDto joinRequestDto) {
@@ -39,11 +38,6 @@ public class MemberController {
     @GetMapping("/info")
     public ResponseEntity<ResponseDto<MemberInfoResponseDto>> memberInfo(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<MemberInfoResponseDto> responseDto = memberService.getInfo(userPrincipal.getMid());
-        return toResponse(responseDto);
-    }
-    @GetMapping("/test")
-    public ResponseEntity<ResponseDto<Void>> test(@RequestBody @Valid EmailRequestDto emailRequestDto) {
-        ResponseDto<Void> responseDto = authCodeService.sendAuthCode(emailRequestDto);
         return toResponse(responseDto);
     }
 }

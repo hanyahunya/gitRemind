@@ -16,18 +16,18 @@ import static com.hanyahunya.gitRemind.util.ResponseUtil.toResponse;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/member")
-public class AuthController {
+@RequestMapping("/auth-code")
+public class AuthCodeController {
     private final AuthCodeService authCodeService;
 
-    @PostMapping("/send-code")
-    public ResponseEntity<ResponseDto<Void>> sendAuthCode(@RequestBody @Valid EmailRequestDto emailRequestDto) {
+    @PostMapping
+    public ResponseEntity<ResponseDto<Void>> send(@RequestBody @Valid EmailRequestDto emailRequestDto) {
         ResponseDto<Void> responseDto = authCodeService.sendAuthCode(emailRequestDto);
         return toResponse(responseDto);
     }
 
-    @PostMapping("/validate-code")
-    public ResponseEntity<ResponseDto<Void>> validateAuthCode(@RequestBody @Valid ValidateCodeRequestDto validateCodeRequestDto) {
+    @PostMapping("/validate")
+    public ResponseEntity<ResponseDto<Void>> validate(@RequestBody @Valid ValidateCodeRequestDto validateCodeRequestDto) {
         ResponseDto<Void> responseDto = authCodeService.validateAuthCode(validateCodeRequestDto);
         return toResponse(responseDto);
     }

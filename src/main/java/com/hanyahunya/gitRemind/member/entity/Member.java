@@ -12,5 +12,6 @@ public class Member {
     private String id;
     private String pw;
     private String email;
-    private String git_addr;
+    private String git_username;
+    private int token_version;
 }
