@@ -8,20 +8,25 @@ import com.hanyahunya.gitRemind.member.dto.MemberInfoResponseDto;
 import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final TokenService tokenService;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public ResponseDto<JwtResponseDto> join(JoinRequestDto joinRequestDto) {
         UUID uuid = UUID.randomUUID();
         Member member = joinRequestDto.dtoToEntity();
         member.setMid(uuid.toString());
-        // todo encodePw(04.18)
+        // パスワードencode
+        member.setPw(passwordEncoder.encode(member.getPw()));
         boolean success = memberRepository.saveMember(member);
         if (success) {
             String token = tokenService.generateToken(member);
@@ -33,14 +38,18 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public ResponseDto<JwtResponseDto> login(LoginRequestDto loginRequestDto) {
-        // todo encodePw(04.18)
-//        loginRequestDto.getPw();
-//        loginRequestDto.setPw("");
-        return memberRepository.validateMember(loginRequestDto.dtoToEntity())
-                .map(member ->
-                        ResponseDto.success("ログイン成功", JwtResponseDto.set(tokenService.generateToken(member)))
-                )
-                .orElseGet(() -> ResponseDto.fail("ログイン失敗"));
+        Optional<Member> optionalMember = memberRepository.validateMember(loginRequestDto.dtoToEntity());
+        if (optionalMember.isPresent()) {
+            String reqPw = loginRequestDto.getPw();
+            Member member = optionalMember.get();
+            if (passwordEncoder.matches(reqPw, member.getPw())) {
+                return ResponseDto.success("ログイン成功", JwtResponseDto.set(tokenService.generateToken(member)));
+            } else {
+                return ResponseDto.fail("ログイン失敗");
+            }
+        } else {
+            return ResponseDto.fail("ログイン失敗");
+        }
     }
 
     @Override
