@@ -2,7 +2,9 @@ package com.hanyahunya.gitRemind.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 
+@Getter
 @Data
 @AllArgsConstructor(staticName = "set")
 public class ResponseDto <D> {

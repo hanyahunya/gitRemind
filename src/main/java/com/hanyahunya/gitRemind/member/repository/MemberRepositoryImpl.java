@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +45,45 @@ public class MemberRepositoryImpl implements  MemberRepository{
         List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), member.getId());
         return memberList.stream().findFirst();
     }
+
+    @Override
+    public boolean updateMember(Member member) {
+        StringBuilder sqlColumnSb = new StringBuilder("UPDATE member SET ");
+//        StringBuilder sqlValueSb = new StringBuilder("WHERE ");
+        List<Object> parameters = new ArrayList<>();
+
+        if (member.getEmail() != null) {
+            sqlColumnSb.append("email = ?, ");
+            parameters.add(member.getEmail());
+        }
+        if (member.getPw() != null) {
+            sqlColumnSb.append("pw = ?, ");
+            parameters.add(member.getPw());
+        }
+        if (member.getGit_username() != null) {
+            sqlColumnSb.append("git_username = ?, ");
+            parameters.add(member.getGit_username());
+        }
+        if (member.getToken_version() != -1) {
+            sqlColumnSb.append("token_version = ?, ");
+            parameters.add(member.getToken_version());
+        }
+
+        int columnSbLength = sqlColumnSb.length();
+//        int valueSbLength = sqlValueSb.length();
+//        final String sql = new StringBuilder()
+//                .append(sqlColumnSb.delete(columnSbLength - 2, columnSbLength))
+//                .append(sqlValueSb.delete(valueSbLength - 2, valueSbLength))
+//                .toString();
+        final String sql = sqlColumnSb.delete(columnSbLength - 2, columnSbLength).toString() + " WHERE email = ?";
+
+        parameters.add(member.getEmail());
+
+        Object[] parameterArray = parameters.toArray();
+
+        return jdbcTemplate.update(sql, parameterArray) > 0;
+    }
+
 
     private RowMapper<Member> memberRowMapper (String sql) {
         String sqlColumns = sql.substring(0, sql.toLowerCase().indexOf("from"));

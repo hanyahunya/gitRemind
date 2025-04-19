@@ -1,6 +1,7 @@
 package com.hanyahunya.gitRemind.member.controller;
 
 import com.hanyahunya.gitRemind.member.dto.LoginRequestDto;
+import com.hanyahunya.gitRemind.member.dto.ResetPwRequestDto;
 import com.hanyahunya.gitRemind.member.service.PasswordService;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import jakarta.validation.Valid;
@@ -20,8 +21,8 @@ public class PasswordController {
     private  final PasswordService passwordService;
 
     @PostMapping("/resetPassword")
-    public ResponseEntity<ResponseDto<Void>> resetPassword(@RequestBody @Valid LoginRequestDto loginRequestDto) {
-        ResponseDto<Void> responseDto = passwordService.forgotPassword();
+    public ResponseEntity<ResponseDto<Void>> resetPassword(@RequestBody @Valid ResetPwRequestDto resetPwRequestDto) {
+        ResponseDto<Void> responseDto = passwordService.forgotPassword(resetPwRequestDto);
         return toResponse(responseDto);
     }
 }
