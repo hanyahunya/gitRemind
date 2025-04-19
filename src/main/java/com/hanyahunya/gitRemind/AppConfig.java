@@ -34,7 +34,7 @@ public class AppConfig {
 
     @Bean
     public PasswordService passwordService() {
-        return new PasswordServiceImpl();
+        return new PasswordServiceImpl(memberRepository(), pwTokenService());
     }
 
     @Bean
@@ -42,10 +42,6 @@ public class AppConfig {
         return new MemberRepositoryImpl(dataSource);
     }
 
-    @Bean
-    public TokenService tokenService() {
-        return new JwtTokenService(memberRepository());
-    }
 
     @Bean
     public SendEmailService sendEmailService() {
@@ -56,4 +52,14 @@ public class AppConfig {
     public AuthCodeService authCodeService() {
         return new AuthCodeServiceImpl(sendEmailService());
     }
+
+    @Bean
+    public TokenService tokenService() {
+        return new JwtTokenService(memberRepository());
+    }
+    @Bean
+    public PwTokenService pwTokenService() {
+        return new JwtPwTokenService();
+    }
+
 }

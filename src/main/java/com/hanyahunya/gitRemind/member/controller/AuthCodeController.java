@@ -1,5 +1,8 @@
 package com.hanyahunya.gitRemind.member.controller;
 
+import com.hanyahunya.gitRemind.member.dto.JwtResponseDto;
+import com.hanyahunya.gitRemind.member.entity.Member;
+import com.hanyahunya.gitRemind.member.service.PwTokenService;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.dto.EmailRequestDto;
 import com.hanyahunya.gitRemind.member.dto.ValidateCodeRequestDto;
@@ -19,6 +22,7 @@ import static com.hanyahunya.gitRemind.util.ResponseUtil.toResponse;
 @RequestMapping("/auth-code")
 public class AuthCodeController {
     private final AuthCodeService authCodeService;
+    private final PwTokenService pwTokenService;
 
     @PostMapping
     public ResponseEntity<ResponseDto<Void>> send(@RequestBody @Valid EmailRequestDto emailRequestDto) {
@@ -30,5 +34,16 @@ public class AuthCodeController {
     public ResponseEntity<ResponseDto<Void>> validate(@RequestBody @Valid ValidateCodeRequestDto validateCodeRequestDto) {
         ResponseDto<Void> responseDto = authCodeService.validateAuthCode(validateCodeRequestDto);
         return toResponse(responseDto);
+    }
+
+    @PostMapping("/validate/pw-code")
+    public ResponseEntity<ResponseDto<JwtResponseDto>> validatePwCode(@RequestBody @Valid ValidateCodeRequestDto validateCodeRequestDto) {
+        if (authCodeService.validateAuthCode(validateCodeRequestDto).isSuccess()) {
+            String token = pwTokenService.generateToken(validateCodeRequestDto.getEmail());
+            ResponseDto<JwtResponseDto> responseDto = ResponseDto.success("success", JwtResponseDto.set(token));
+            return ResponseEntity.ok(responseDto);
+        } else {
+            return ResponseEntity.status(401).build();
+        }
     }
 }

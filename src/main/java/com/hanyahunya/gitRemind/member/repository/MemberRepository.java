@@ -10,4 +10,6 @@ public interface MemberRepository {
     Optional<Member> findMemberByMid(String mid);
 
     Optional<Member> validateMember(Member member);
+
+    boolean updateMember(Member member);
 }
