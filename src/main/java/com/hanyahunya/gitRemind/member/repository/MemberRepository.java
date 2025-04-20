@@ -8,6 +8,7 @@ public interface MemberRepository {
     boolean saveMember(Member member);
 
     Optional<Member> findMemberByMid(String mid);
+    Optional<Member> findMemberByEmail(String email);
 
     Optional<Member> validateMember(Member member);
 

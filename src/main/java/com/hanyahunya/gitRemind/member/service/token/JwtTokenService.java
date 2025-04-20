@@ -1,4 +1,4 @@
-package com.hanyahunya.gitRemind.member.service;
+package com.hanyahunya.gitRemind.member.service.token;
 
 import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
@@ -34,6 +34,7 @@ public class JwtTokenService implements TokenService {
     public String generateToken(Member member) {
         Member dbMember = getMemberByMid(member.getMid());
         return Jwts.builder()
+                .claim("purpose", "access")
                 .claim("mid", member.getMid())
                 .claim("token_version", dbMember.getToken_version())
                 .issuedAt(new Date())

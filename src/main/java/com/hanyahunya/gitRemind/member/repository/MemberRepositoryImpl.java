@@ -40,6 +40,13 @@ public class MemberRepositoryImpl implements  MemberRepository{
     }
 
     @Override
+    public Optional<Member> findMemberByEmail(String email) {
+        final String sql = "SELECT mid FROM member WHERE email = ?";
+        List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), email);
+        return memberList.stream().findFirst();
+    }
+
+    @Override
     public Optional<Member> validateMember(Member member) {
         final String sql = "SELECT pw, mid FROM member WHERE id = ?";
         List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), member.getId());
@@ -49,7 +56,6 @@ public class MemberRepositoryImpl implements  MemberRepository{
     @Override
     public boolean updateMember(Member member) {
         StringBuilder sqlColumnSb = new StringBuilder("UPDATE member SET ");
-//        StringBuilder sqlValueSb = new StringBuilder("WHERE ");
         List<Object> parameters = new ArrayList<>();
 
         if (member.getEmail() != null) {
@@ -70,14 +76,10 @@ public class MemberRepositoryImpl implements  MemberRepository{
         }
 
         int columnSbLength = sqlColumnSb.length();
-//        int valueSbLength = sqlValueSb.length();
-//        final String sql = new StringBuilder()
-//                .append(sqlColumnSb.delete(columnSbLength - 2, columnSbLength))
-//                .append(sqlValueSb.delete(valueSbLength - 2, valueSbLength))
-//                .toString();
-        final String sql = sqlColumnSb.delete(columnSbLength - 2, columnSbLength).toString() + " WHERE email = ?";
 
-        parameters.add(member.getEmail());
+        final String sql = sqlColumnSb.delete(columnSbLength - 2, columnSbLength).toString() + " WHERE mid = ?";
+
+        parameters.add(member.getMid());
 
         Object[] parameterArray = parameters.toArray();
 

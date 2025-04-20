@@ -5,8 +5,10 @@ import com.hanyahunya.gitRemind.infrastructure.email.SendEmailServiceImpl;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import com.hanyahunya.gitRemind.member.repository.MemberRepositoryImpl;
 import com.hanyahunya.gitRemind.member.service.*;
-import com.hanyahunya.gitRemind.security.JwtAuthFilter;
-import lombok.RequiredArgsConstructor;
+import com.hanyahunya.gitRemind.member.service.token.JwtPwTokenService;
+import com.hanyahunya.gitRemind.member.service.token.JwtTokenService;
+import com.hanyahunya.gitRemind.member.service.token.PwTokenService;
+import com.hanyahunya.gitRemind.member.service.token.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,12 +31,17 @@ public class AppConfig {
 
     @Bean
     public MemberService memberService() {
-        return new MemberServiceImpl(memberRepository(), tokenService());
+        return new MemberServiceImpl(memberRepository(), tokenService(), pwEncodeService());
     }
 
     @Bean
     public PasswordService passwordService() {
-        return new PasswordServiceImpl(memberRepository(), pwTokenService());
+        return new PasswordServiceImpl(memberRepository(), pwEncodeService());
+    }
+
+    @Bean
+    public PwEncodeService pwEncodeService() {
+        return new BCryptPwEncodeService();
     }
 
     @Bean

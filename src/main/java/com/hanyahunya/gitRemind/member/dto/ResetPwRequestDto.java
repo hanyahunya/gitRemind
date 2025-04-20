@@ -1,15 +1,14 @@
 package com.hanyahunya.gitRemind.member.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
 public class ResetPwRequestDto {
-    @NotNull
+    @JsonIgnore
     private String email;
-    @NotNull
-    private String token;
     @NotNull
     private String newPw;
 }

@@ -6,22 +6,30 @@ import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 public class PasswordServiceImpl implements PasswordService {
     private final MemberRepository memberRepository;
-    private final PwTokenService pwTokenService;
+    private final PwEncodeService pwEncodeService;
 
     @Override
     public ResponseDto<Void> forgotPassword(ResetPwRequestDto resetPwRequestDto) {
-        if(pwTokenService.validateToken(resetPwRequestDto.getToken())) {
-            Member member = Member.builder().email(resetPwRequestDto.getEmail()).pw(resetPwRequestDto.getNewPw()).build();
+        resetPwRequestDto.setNewPw(pwEncodeService.encode(resetPwRequestDto.getNewPw()));
+        Optional<Member> optionalMember = memberRepository.findMemberByEmail(resetPwRequestDto.getEmail());
+        if(optionalMember.isPresent()) {
+            Member member = Member.builder()
+                    .mid(optionalMember.get().getMid())
+                    .pw(resetPwRequestDto.getNewPw())
+                    .build();
             if(memberRepository.updateMember(member)) {
-                return ResponseDto.success("success");
+                return ResponseDto.success("パスワード更新成功");
             } else {
-                return ResponseDto.fail("fail");
+                return ResponseDto.fail("パスワード更新失敗");
             }
+        } else {
+            return ResponseDto.fail("パスワード更新失敗");
         }
-        return null;
     }
 
     @Override

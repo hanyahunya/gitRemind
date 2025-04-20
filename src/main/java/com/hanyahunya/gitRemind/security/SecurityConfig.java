@@ -37,7 +37,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/member/join", "/member/login", "/member/send-code"
-                                        , "/member/validate-code").permitAll() // 認証なしにアクセス可能
+                                        , "/member/validate-code", "/auth-code",
+                                        "/auth-code/validate/pw-code").permitAll() // 認証なしにアクセス可能
                                 .anyRequest().authenticated() // 他のリクエストは認証必要
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
