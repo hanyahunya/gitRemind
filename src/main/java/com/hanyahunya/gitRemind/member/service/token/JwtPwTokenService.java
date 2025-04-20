@@ -1,6 +1,5 @@
-package com.hanyahunya.gitRemind.member.service;
+package com.hanyahunya.gitRemind.member.service.token;
 
-import com.hanyahunya.gitRemind.member.entity.Member;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -27,6 +26,7 @@ public class JwtPwTokenService implements PwTokenService {
     @Override
     public String generateToken(String email) {
         return Jwts.builder()
+                .claim("purpose", "password_reset")
                 .claim("email", email)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))

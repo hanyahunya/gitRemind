@@ -1,5 +1,6 @@
 package com.hanyahunya.gitRemind.member.service;
 
+import com.hanyahunya.gitRemind.member.service.token.TokenService;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.dto.JoinRequestDto;
 import com.hanyahunya.gitRemind.member.dto.JwtResponseDto;
@@ -8,8 +9,6 @@ import com.hanyahunya.gitRemind.member.dto.MemberInfoResponseDto;
 import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -18,7 +17,7 @@ import java.util.UUID;
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final TokenService tokenService;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PwEncodeService pwEncodeService;
 
     @Override
     public ResponseDto<JwtResponseDto> join(JoinRequestDto joinRequestDto) {
@@ -26,7 +25,7 @@ public class MemberServiceImpl implements MemberService {
         Member member = joinRequestDto.dtoToEntity();
         member.setMid(uuid.toString());
         // パスワードencode
-        member.setPw(passwordEncoder.encode(member.getPw()));
+        member.setPw(pwEncodeService.encode(member.getPw()));
         boolean success = memberRepository.saveMember(member);
         if (success) {
             String token = tokenService.generateToken(member);
@@ -42,7 +41,7 @@ public class MemberServiceImpl implements MemberService {
         if (optionalMember.isPresent()) {
             String reqPw = loginRequestDto.getPw();
             Member member = optionalMember.get();
-            if (passwordEncoder.matches(reqPw, member.getPw())) {
+            if (pwEncodeService.matches(reqPw, member.getPw())) {
                 return ResponseDto.success("ログイン成功", JwtResponseDto.set(tokenService.generateToken(member)));
             } else {
                 return ResponseDto.fail("ログイン失敗");
