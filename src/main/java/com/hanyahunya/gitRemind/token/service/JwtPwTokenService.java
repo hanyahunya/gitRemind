@@ -1,4 +1,4 @@
-package com.hanyahunya.gitRemind.member.service.token;
+package com.hanyahunya.gitRemind.token.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

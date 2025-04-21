@@ -1,5 +1,6 @@
 package com.hanyahunya.gitRemind.member.service;
 
+import com.hanyahunya.gitRemind.member.dto.ChangePwRequestDto;
 import com.hanyahunya.gitRemind.member.dto.ResetPwRequestDto;
 import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
@@ -24,16 +25,26 @@ public class PasswordServiceImpl implements PasswordService {
                     .build();
             if(memberRepository.updateMember(member)) {
                 return ResponseDto.success("パスワード更新成功");
-            } else {
-                return ResponseDto.fail("パスワード更新失敗");
             }
-        } else {
-            return ResponseDto.fail("パスワード更新失敗");
         }
+        return ResponseDto.fail("パスワード更新失敗");
     }
 
     @Override
-    public ResponseDto<Void> changePassword() {
-        return null;
+    public ResponseDto<Void> changePassword(ChangePwRequestDto requestDto) {
+        Optional<Member> optionalMember = memberRepository.findMemberByMid(requestDto.getMid());
+        if(optionalMember.isPresent()) {
+            Member dbMember = optionalMember.get();
+            if(pwEncodeService.matches(requestDto.getOldPw(), dbMember.getPw())) {
+                Member member = Member.builder()
+                        .mid(requestDto.getMid())
+                        .pw(pwEncodeService.encode(requestDto.getNewPw()))
+                        .build();
+                if(memberRepository.updateMember(member)) {
+                    return ResponseDto.success("パスワード修正成功");
+                }
+            }
+        }
+        return ResponseDto.fail("パスワード修正失敗");
     }
 }

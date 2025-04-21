@@ -1,5 +1,6 @@
 package com.hanyahunya.gitRemind.member.controller;
 
+import com.hanyahunya.gitRemind.member.dto.ChangePwRequestDto;
 import com.hanyahunya.gitRemind.member.dto.ResetPwRequestDto;
 import com.hanyahunya.gitRemind.member.service.PasswordService;
 import com.hanyahunya.gitRemind.security.UserPrincipal;
@@ -24,10 +25,17 @@ public class PasswordController {
     /**
      * @param userPrincipal /auth-code/validate/pw-codeから発行した使い捨てのJwtTokenが必要
      */
-    @PostMapping("/resetPassword")
+    @PostMapping("/reset-password")
     public ResponseEntity<ResponseDto<Void>> resetPassword(@RequestBody @Valid ResetPwRequestDto resetPwRequestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         resetPwRequestDto.setEmail(userPrincipal.getEmail());
         ResponseDto<Void> responseDto = passwordService.forgotPassword(resetPwRequestDto);
+        return toResponse(responseDto);
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ResponseDto<Void>> changePassword(@RequestBody @Valid ChangePwRequestDto changePwRequestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        changePwRequestDto.setMid(userPrincipal.getMid());
+        ResponseDto<Void> responseDto = passwordService.changePassword(changePwRequestDto);
         return toResponse(responseDto);
     }
 }

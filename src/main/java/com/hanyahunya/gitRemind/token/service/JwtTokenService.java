@@ -1,4 +1,4 @@
-package com.hanyahunya.gitRemind.member.service.token;
+package com.hanyahunya.gitRemind.token.service;
 
 import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;

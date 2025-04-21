@@ -1,7 +1,7 @@
     package com.hanyahunya.gitRemind.security;
 
-    import com.hanyahunya.gitRemind.member.service.token.PwTokenService;
-    import com.hanyahunya.gitRemind.member.service.token.TokenService;
+    import com.hanyahunya.gitRemind.token.service.PwTokenService;
+    import com.hanyahunya.gitRemind.token.service.TokenService;
     import io.jsonwebtoken.Claims;
     import io.jsonwebtoken.ExpiredJwtException;
     import jakarta.servlet.FilterChain;
@@ -26,6 +26,8 @@
         private final PwTokenService pwTokenService;
         private final StringRedisTemplate redisTemplate;
 
+        //todo(04.21) make refresh token.
+        //todo(04.21) tokenをHttpOnlyのクッキーに入れて応答
         @Override
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
             String authHeader = request.getHeader("Authorization");
