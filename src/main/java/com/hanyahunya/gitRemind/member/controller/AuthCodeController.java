@@ -1,7 +1,7 @@
 package com.hanyahunya.gitRemind.member.controller;
 
 import com.hanyahunya.gitRemind.member.dto.JwtResponseDto;
-import com.hanyahunya.gitRemind.member.service.token.PwTokenService;
+import com.hanyahunya.gitRemind.token.service.PwTokenService;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.dto.EmailRequestDto;
 import com.hanyahunya.gitRemind.member.dto.ValidateCodeRequestDto;

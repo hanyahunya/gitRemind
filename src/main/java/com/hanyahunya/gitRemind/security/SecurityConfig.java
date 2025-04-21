@@ -12,6 +12,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -33,12 +35,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        final String[] whitelist = {
+                "/member/join", "/member/login",
+                "/member/send-code", "/member/validate-code",
+                "/auth-code", "/auth-code/validate/pw-code"
+        };
+
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/member/join", "/member/login", "/member/send-code"
-                                        , "/member/validate-code", "/auth-code",
-                                        "/auth-code/validate/pw-code").permitAll() // 認証なしにアクセス可能
+                                .requestMatchers(whitelist).permitAll() // 認証なしにアクセス可能
                                 .anyRequest().authenticated() // 他のリクエストは認証必要
                 )
                 .formLogin(AbstractHttpConfigurer::disable)

@@ -34,7 +34,7 @@ public class MemberRepositoryImpl implements  MemberRepository{
 
     @Override
     public Optional<Member> findMemberByMid(String mid) {
-        final String sql = "SELECT email, git_username, token_version FROM member WHERE mid = ?";
+        final String sql = "SELECT pw, email, git_username, token_version FROM member WHERE mid = ?";
         List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), mid);
         return memberList.stream().findFirst();
     }
