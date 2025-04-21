@@ -55,7 +55,7 @@ public class MemberServiceImpl implements MemberService {
     public ResponseDto<MemberInfoResponseDto> getInfo(String mid) {
         return memberRepository.findMemberByMid(mid)
                 .map(member ->
-                        ResponseDto.success("ユーザー情報ロード成功", MemberInfoResponseDto.set(member.getEmail(), member.getGit_username()))
+                        ResponseDto.success("ユーザー情報ロード成功", MemberInfoResponseDto.set(member.getEmail()))
                 )
                 .orElseGet(() -> ResponseDto.fail("ユーザー情報ロード失敗"));
     }

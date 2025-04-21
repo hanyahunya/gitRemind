@@ -12,7 +12,6 @@ public class Member {
     private String id;
     private String pw;
     private String email;
-    private String git_username;
     @Builder.Default
     private int token_version = -1;
 }

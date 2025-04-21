@@ -12,7 +12,7 @@ public interface MemberService {
      * @return JwtResponseDto.token(String)
      */
     ResponseDto<JwtResponseDto> join(JoinRequestDto joinRequestDto);
-    // todo(04.14) - add reset password / delete member / update memberInfo
+    // todo(04.21) delete member / update memberInfo
 
     /**
      * @param loginRequestDto id,pw必須
