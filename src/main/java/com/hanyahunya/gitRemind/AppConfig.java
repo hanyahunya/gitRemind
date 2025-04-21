@@ -1,5 +1,9 @@
 package com.hanyahunya.gitRemind;
 
+import com.hanyahunya.gitRemind.contribution.repository.ContributionRepository;
+import com.hanyahunya.gitRemind.contribution.repository.ContributionRepositoryImpl;
+import com.hanyahunya.gitRemind.contribution.service.ContributionService;
+import com.hanyahunya.gitRemind.contribution.service.ContributionServiceImpl;
 import com.hanyahunya.gitRemind.infrastructure.email.SendEmailService;
 import com.hanyahunya.gitRemind.infrastructure.email.SendEmailServiceImpl;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
@@ -29,37 +33,37 @@ public class AppConfig {
         this.templateEngine = templateEngine;
     }
 
+    // ここからmemberパッケージ
     @Bean
     public MemberService memberService() {
         return new MemberServiceImpl(memberRepository(), tokenService(), pwEncodeService());
     }
-
     @Bean
     public PasswordService passwordService() {
         return new PasswordServiceImpl(memberRepository(), pwEncodeService());
     }
-
     @Bean
     public PwEncodeService pwEncodeService() {
         return new BCryptPwEncodeService();
     }
-
     @Bean
     public MemberRepository memberRepository() {
         return new MemberRepositoryImpl(dataSource);
     }
-
-
-    @Bean
-    public SendEmailService sendEmailService() {
-        return new SendEmailServiceImpl(javaMailSender, templateEngine);
-    }
-
     @Bean
     public AuthCodeService authCodeService() {
         return new AuthCodeServiceImpl(sendEmailService());
     }
+    // ここまでmemberパッケージ
 
+    // ここからinfrastructureパッケージ
+    @Bean
+    public SendEmailService sendEmailService() {
+        return new SendEmailServiceImpl(javaMailSender, templateEngine);
+    }
+    // ここまでinfrastructureパッケージ
+
+    // ここからtokenパッケージ
     @Bean
     public TokenService tokenService() {
         return new JwtTokenService(memberRepository());
@@ -68,5 +72,16 @@ public class AppConfig {
     public PwTokenService pwTokenService() {
         return new JwtPwTokenService();
     }
+    // ここまでtokenパッケージ
 
+    // ここからcontributionパッケージ
+    @Bean
+    public ContributionRepository contributionRepository() {
+        return new ContributionRepositoryImpl(dataSource);
+    }
+    @Bean
+    public ContributionService contributionService() {
+        return new ContributionServiceImpl(contributionRepository());
+    }
+    // ここまでcontributionパッケージ
 }

@@ -2,7 +2,6 @@ package com.hanyahunya.gitRemind.member.controller;
 
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.dto.*;
-import com.hanyahunya.gitRemind.member.service.AuthCodeService;
 import com.hanyahunya.gitRemind.member.service.MemberService;
 import com.hanyahunya.gitRemind.security.UserPrincipal;
 import jakarta.validation.Valid;

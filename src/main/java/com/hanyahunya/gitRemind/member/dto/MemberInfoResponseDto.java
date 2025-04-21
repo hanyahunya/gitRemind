@@ -8,5 +8,4 @@ import lombok.Getter;
 public class MemberInfoResponseDto {
 //    private String id;
     private String email;
-    private String git_username;
 }
