@@ -2,6 +2,7 @@ package com.hanyahunya.gitRemind.contribution.repository;
 
 import com.hanyahunya.gitRemind.contribution.entity.Contribution;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ContributionRepository {
@@ -12,4 +13,7 @@ public interface ContributionRepository {
     Optional<Contribution> getContributionByGitUsername(String gitUsername);
 
     boolean updateContribution(Contribution contribution);
+
+    // !!! for Scheduler dont use スケジューラ以外では使わない !!!
+    List<Contribution> findAllContributions();
 }

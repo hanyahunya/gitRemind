@@ -4,6 +4,7 @@ import com.hanyahunya.gitRemind.contribution.repository.ContributionRepository;
 import com.hanyahunya.gitRemind.contribution.repository.ContributionRepositoryImpl;
 import com.hanyahunya.gitRemind.contribution.service.ContributionService;
 import com.hanyahunya.gitRemind.contribution.service.ContributionServiceImpl;
+import com.hanyahunya.gitRemind.contribution.service.SchedulerService;
 import com.hanyahunya.gitRemind.infrastructure.email.SendEmailService;
 import com.hanyahunya.gitRemind.infrastructure.email.SendEmailServiceImpl;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
@@ -82,6 +83,10 @@ public class AppConfig {
     @Bean
     public ContributionService contributionService() {
         return new ContributionServiceImpl(contributionRepository());
+    }
+    @Bean
+    public SchedulerService schedulerService() {
+        return new SchedulerService(contributionRepository(), sendEmailService());
     }
     // ここまでcontributionパッケージ
 }

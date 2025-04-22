@@ -54,10 +54,19 @@ public class ContributionRepositoryImpl implements ContributionRepository {
         return (jdbcTemplate.update(sql, parameterArray) > 0);
     }
 
+    @Override
+    public List<Contribution> findAllContributions() {
+        final String sql = "SELECT mid, email, git_username, alarm_hour_bit, is_today_committed FROM member WHERE is_today_committed = false";
+        return jdbcTemplate.query(sql, contributionRowMapper(sql));
+    }
+
     private RowMapper<Contribution> contributionRowMapper(String sql) {
         String sqlColumns = sql.substring(0, sql.toLowerCase().indexOf("from"));
         return (rs, rowNum) -> {
             Contribution contribution = Contribution.builder().build();
+            if (sqlColumns.contains("mid")) {
+                contribution.setMid(rs.getString("mid"));
+            }
             if (sqlColumns.contains("git_username")) {
                 contribution.setGitUsername(rs.getString("git_username"));
             }
@@ -66,6 +75,11 @@ public class ContributionRepositoryImpl implements ContributionRepository {
             }
             if (sqlColumns.contains("is_today_committed")) {
                 contribution.setCommitted(rs.getBoolean("is_today_committed"));
+            }
+
+            // for Scheduler only
+            if (sqlColumns.contains("email")) {
+                contribution.setEmail(rs.getString("email"));
             }
             return contribution;
         };
