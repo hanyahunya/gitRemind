@@ -19,9 +19,12 @@ public class PasswordServiceImpl implements PasswordService {
         resetPwRequestDto.setNewPw(pwEncodeService.encode(resetPwRequestDto.getNewPw()));
         Optional<Member> optionalMember = memberRepository.findMemberByEmail(resetPwRequestDto.getEmail());
         if(optionalMember.isPresent()) {
+            Member dbMember = optionalMember.get();
+            int updateTokenVersion = dbMember.getToken_version() + 1;
             Member member = Member.builder()
-                    .mid(optionalMember.get().getMid())
+                    .mid(dbMember.getMid())
                     .pw(resetPwRequestDto.getNewPw())
+                    .token_version(updateTokenVersion)
                     .build();
             if(memberRepository.updateMember(member)) {
                 return ResponseDto.success("パスワード更新成功");
@@ -35,10 +38,12 @@ public class PasswordServiceImpl implements PasswordService {
         Optional<Member> optionalMember = memberRepository.findMemberByMid(requestDto.getMid());
         if(optionalMember.isPresent()) {
             Member dbMember = optionalMember.get();
+            int updateTokenVersion = dbMember.getToken_version() + 1;
             if(pwEncodeService.matches(requestDto.getOldPw(), dbMember.getPw())) {
                 Member member = Member.builder()
                         .mid(requestDto.getMid())
                         .pw(pwEncodeService.encode(requestDto.getNewPw()))
+                        .token_version(updateTokenVersion)
                         .build();
                 if(memberRepository.updateMember(member)) {
                     return ResponseDto.success("パスワード修正成功");

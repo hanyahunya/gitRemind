@@ -13,4 +13,7 @@ public class Contribution {
     @Builder.Default
     private int alarmBit = -1;
     private Boolean committed;
+
+    // for scheduler only
+    private String email;
 }

@@ -40,7 +40,7 @@ public class MemberRepositoryImpl implements  MemberRepository{
 
     @Override
     public Optional<Member> findMemberByEmail(String email) {
-        final String sql = "SELECT mid FROM member WHERE email = ?";
+        final String sql = "SELECT mid, token_version FROM member WHERE email = ?";
         List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), email);
         return memberList.stream().findFirst();
     }
