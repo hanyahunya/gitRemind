@@ -7,6 +7,7 @@ import com.hanyahunya.gitRemind.contribution.service.ContributionServiceImpl;
 import com.hanyahunya.gitRemind.contribution.service.SchedulerService;
 import com.hanyahunya.gitRemind.infrastructure.email.SendEmailService;
 import com.hanyahunya.gitRemind.infrastructure.email.SendEmailServiceImpl;
+import com.hanyahunya.gitRemind.infrastructure.github.GithubHtmlScraper;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import com.hanyahunya.gitRemind.member.repository.MemberRepositoryImpl;
 import com.hanyahunya.gitRemind.member.service.*;
@@ -62,6 +63,10 @@ public class AppConfig {
     public SendEmailService sendEmailService() {
         return new SendEmailServiceImpl(javaMailSender, templateEngine);
     }
+    @Bean
+    public GithubHtmlScraper githubHtmlScraper() {
+        return new GithubHtmlScraper();
+    }
     // ここまでinfrastructureパッケージ
 
     // ここからtokenパッケージ
@@ -86,7 +91,7 @@ public class AppConfig {
     }
     @Bean
     public SchedulerService schedulerService() {
-        return new SchedulerService(contributionRepository(), sendEmailService());
+        return new SchedulerService(contributionRepository(), sendEmailService(), githubHtmlScraper());
     }
     // ここまでcontributionパッケージ
 }

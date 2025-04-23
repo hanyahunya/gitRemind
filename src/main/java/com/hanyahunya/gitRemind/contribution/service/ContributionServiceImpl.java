@@ -7,6 +7,7 @@ import com.hanyahunya.gitRemind.contribution.dto.GitUsernameRequestDto;
 import com.hanyahunya.gitRemind.contribution.entity.Contribution;
 import com.hanyahunya.gitRemind.contribution.repository.ContributionRepository;
 import com.hanyahunya.gitRemind.contribution.util.AlarmTimeBitConverter;
+import com.hanyahunya.gitRemind.infrastructure.github.GithubUserValidator;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import lombok.RequiredArgsConstructor;
 
@@ -18,10 +19,14 @@ public class ContributionServiceImpl implements ContributionService {
 
     @Override
     public ResponseDto<Void> saveOrUpdateGitUsername(GitUsernameRequestDto requestDto) {
-        if(contributionRepository.updateContribution(requestDto.toEntity())) {
-            return ResponseDto.success("gitユーザー名設定成功");
+        if(GithubUserValidator.isValid(requestDto.getGitUsername())) {
+            if(contributionRepository.updateContribution(requestDto.toEntity())) {
+                return ResponseDto.success("gitユーザー名設定成功");
+            } else {
+                return ResponseDto.success("gitユーザー名設定失敗");
+            }
         } else {
-            return ResponseDto.success("gitユーザー名設定失敗");
+            return ResponseDto.fail("check git username");
         }
     }
 
