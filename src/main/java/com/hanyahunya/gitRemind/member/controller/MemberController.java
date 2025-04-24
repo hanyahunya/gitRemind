@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import static com.hanyahunya.gitRemind.util.ResponseUtil.toResponse;
 
@@ -37,6 +34,20 @@ public class MemberController {
     @GetMapping("/info")
     public ResponseEntity<ResponseDto<MemberInfoResponseDto>> memberInfo(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         ResponseDto<MemberInfoResponseDto> responseDto = memberService.getInfo(userPrincipal.getMid());
+        return toResponse(responseDto);
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<ResponseDto<Void>> update(@RequestBody @Valid UpdateMemberRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        requestDto.setMid(userPrincipal.getMid());
+        ResponseDto<Void> responseDto = memberService.updateMember(requestDto);
+        return toResponse(responseDto);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<ResponseDto<Void>> delete(@RequestBody @Valid DeleteMemberRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        requestDto.setMid(userPrincipal.getMid());
+        ResponseDto<Void> responseDto = memberService.deleteMember(requestDto);
         return toResponse(responseDto);
     }
 }

@@ -1,11 +1,8 @@
 package com.hanyahunya.gitRemind.member.service;
 
+import com.hanyahunya.gitRemind.member.dto.*;
 import com.hanyahunya.gitRemind.token.service.TokenService;
 import com.hanyahunya.gitRemind.util.ResponseDto;
-import com.hanyahunya.gitRemind.member.dto.JoinRequestDto;
-import com.hanyahunya.gitRemind.member.dto.JwtResponseDto;
-import com.hanyahunya.gitRemind.member.dto.LoginRequestDto;
-import com.hanyahunya.gitRemind.member.dto.MemberInfoResponseDto;
 import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -61,12 +58,26 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public ResponseDto<Void> deleteMember() {
-        return null;
+    public ResponseDto<Void> deleteMember(DeleteMemberRequestDto requestDto) {
+        requestDto.setPw(pwEncodeService.encode(requestDto.getPw()));
+        if(memberRepository.deleteMember(requestDto.toEntity())) {
+            return ResponseDto.success("ユーザー退会成功");
+        } else {
+            return ResponseDto.success("ユーザー退会失敗");
+        }
     }
 
     @Override
-    public ResponseDto<Void> updateMember() {
-        return null;
+    public ResponseDto<Void> updateMember(UpdateMemberRequestDto requestDto) {
+        Optional<Member> optionalMember = memberRepository.validateMember(requestDto.toEntity());
+        if (optionalMember.isPresent()) {
+            Member dbMember = optionalMember.get();
+            if (pwEncodeService.matches(requestDto.getPw(), dbMember.getPw())) {
+                if (memberRepository.updateMember(requestDto.toEntity())) {
+                    return ResponseDto.success("ユーザー情報更新成功");
+                }
+            }
+        }
+        return ResponseDto.fail("ユーザー情報更新失敗");
     }
 }
