@@ -81,6 +81,12 @@ public class MemberRepositoryImpl implements  MemberRepository{
         return jdbcTemplate.update(sql, parameterArray) > 0;
     }
 
+    @Override
+    public boolean deleteMember(Member member) {
+        final String sql = "DELETE FROM member WHERE mid = ?, id = ?, pw = ?";
+        return jdbcTemplate.update(sql, member.getMid(), member.getId(), member.getPw()) > 0;
+    }
+
 
     private RowMapper<Member> memberRowMapper (String sql) {
         String sqlColumns = sql.substring(0, sql.toLowerCase().indexOf("from"));

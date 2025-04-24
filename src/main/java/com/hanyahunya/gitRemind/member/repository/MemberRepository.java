@@ -13,4 +13,6 @@ public interface MemberRepository {
     Optional<Member> validateMember(Member member);
 
     boolean updateMember(Member member);
+
+    boolean deleteMember(Member member);
 }

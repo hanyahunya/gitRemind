@@ -1,10 +1,7 @@
 package com.hanyahunya.gitRemind.member.service;
 
+import com.hanyahunya.gitRemind.member.dto.*;
 import com.hanyahunya.gitRemind.util.ResponseDto;
-import com.hanyahunya.gitRemind.member.dto.JoinRequestDto;
-import com.hanyahunya.gitRemind.member.dto.JwtResponseDto;
-import com.hanyahunya.gitRemind.member.dto.LoginRequestDto;
-import com.hanyahunya.gitRemind.member.dto.MemberInfoResponseDto;
 
 public interface MemberService {
     /**
@@ -26,7 +23,7 @@ public interface MemberService {
      */
     ResponseDto<MemberInfoResponseDto> getInfo(String mid);
 
-    ResponseDto<Void> deleteMember();
+    ResponseDto<Void> deleteMember(DeleteMemberRequestDto deleteMemberRequestDto);
 
-    ResponseDto<Void> updateMember();
+    ResponseDto<Void> updateMember(UpdateMemberRequestDto updateMemberRequestDto);
 }
