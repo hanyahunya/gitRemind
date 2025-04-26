@@ -33,20 +33,20 @@ public class MemberController {
 
     @GetMapping("/info")
     public ResponseEntity<ResponseDto<MemberInfoResponseDto>> memberInfo(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        ResponseDto<MemberInfoResponseDto> responseDto = memberService.getInfo(userPrincipal.getMid());
+        ResponseDto<MemberInfoResponseDto> responseDto = memberService.getInfo(userPrincipal.getMemberId());
         return toResponse(responseDto);
     }
 
     @PatchMapping("/update")
     public ResponseEntity<ResponseDto<Void>> update(@RequestBody @Valid UpdateMemberRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        requestDto.setMid(userPrincipal.getMid());
+        requestDto.setMemberId(userPrincipal.getMemberId());
         ResponseDto<Void> responseDto = memberService.updateMember(requestDto);
         return toResponse(responseDto);
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<ResponseDto<Void>> delete(@RequestBody @Valid DeleteMemberRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        requestDto.setMid(userPrincipal.getMid());
+        requestDto.setMemberId(userPrincipal.getMemberId());
         ResponseDto<Void> responseDto = memberService.deleteMember(requestDto);
         return toResponse(responseDto);
     }

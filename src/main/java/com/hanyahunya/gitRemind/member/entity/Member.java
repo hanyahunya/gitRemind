@@ -8,10 +8,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Member {
-    private String mid; // UUID-char(36) or UUID-Binary(16)
-    private String id;
-    private String pw;
+    private String memberId; // UUID-char(36) or UUID-Binary(16)
+    private String loginId;
+    private String password;
     private String email;
-    @Builder.Default
-    private int token_version = -1;
 }

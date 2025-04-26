@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor(staticName = "set")
 public class MemberInfoResponseDto {
-//    private String id;
+//    private String loginId;
     private String email;
 }

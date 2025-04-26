@@ -7,7 +7,8 @@ import java.util.Optional;
 public interface MemberRepository {
     boolean saveMember(Member member);
 
-    Optional<Member> findMemberByMid(String mid);
+    Optional<Member> findMemberByMemberId(String memberId);
+
     Optional<Member> findMemberByEmail(String email);
 
     Optional<Member> validateMember(Member member);

@@ -14,7 +14,9 @@ import com.hanyahunya.gitRemind.member.service.*;
 import com.hanyahunya.gitRemind.token.service.JwtPwTokenService;
 import com.hanyahunya.gitRemind.token.service.JwtTokenService;
 import com.hanyahunya.gitRemind.token.service.PwTokenService;
-import com.hanyahunya.gitRemind.token.service.TokenService;
+import com.hanyahunya.gitRemind.token.service.AccessTokenService;
+import com.hanyahunya.gitRemind.util.service.BCryptEncodeService;
+import com.hanyahunya.gitRemind.util.service.EncodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,8 +47,8 @@ public class AppConfig {
         return new PasswordServiceImpl(memberRepository(), pwEncodeService());
     }
     @Bean
-    public PwEncodeService pwEncodeService() {
-        return new BCryptPwEncodeService();
+    public EncodeService pwEncodeService() {
+        return new BCryptEncodeService();
     }
     @Bean
     public MemberRepository memberRepository() {
@@ -71,7 +73,7 @@ public class AppConfig {
 
     // ここからtokenパッケージ
     @Bean
-    public TokenService tokenService() {
+    public AccessTokenService tokenService() {
         return new JwtTokenService(memberRepository());
     }
     @Bean

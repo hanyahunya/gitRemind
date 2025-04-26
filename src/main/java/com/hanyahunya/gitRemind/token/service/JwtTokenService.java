@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @RequiredArgsConstructor
-public class JwtTokenService implements TokenService {
+public class JwtTokenService implements AccessTokenService {
     private final MemberRepository memberRepository;
 
 
@@ -32,11 +32,9 @@ public class JwtTokenService implements TokenService {
 
     @Override
     public String generateToken(Member member) {
-        Member dbMember = getMemberByMid(member.getMid());
         return Jwts.builder()
                 .claim("purpose", "access")
-                .claim("mid", member.getMid())
-                .claim("token_version", dbMember.getToken_version())
+                .claim("member_id", member.getMemberId())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key)
@@ -45,13 +43,8 @@ public class JwtTokenService implements TokenService {
 
     @Override
     public boolean validateToken(String token) {
-        Claims claims = getClaims(token);
-        String mid = claims.get("mid", String.class);
-        Integer tokenVersion = claims.get("token_version", Integer.class);
-        Member dbMember = getMemberByMid(mid);
-
         // Tokenの有効期限とTokenVersionの一致を確認
-        return (!isTokenExpired(claims.getExpiration()) && tokenVersion.equals(dbMember.getToken_version()));
+        return !isTokenExpired(getClaims(token).getExpiration());
     }
 
     @Override
@@ -66,7 +59,5 @@ public class JwtTokenService implements TokenService {
     private boolean isTokenExpired(Date expirationDate) {
         return expirationDate.before(new Date());
     }
-    private Member getMemberByMid(String mid) {
-        return memberRepository.findMemberByMid(mid).orElse(null);
-    }
+
 }

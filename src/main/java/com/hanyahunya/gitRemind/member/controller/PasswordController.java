@@ -23,7 +23,7 @@ public class PasswordController {
     private final PasswordService passwordService;
 
     /**
-     * @param userPrincipal /auth-code/validate/pw-codeから発行した使い捨てのJwtTokenが必要
+     * @param userPrincipal /auth-code/validate/password-codeから発行した使い捨てのJwtTokenが必要
      */
     @PostMapping("/reset-password")
     public ResponseEntity<ResponseDto<Void>> resetPassword(@RequestBody @Valid ResetPwRequestDto resetPwRequestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -34,7 +34,7 @@ public class PasswordController {
 
     @PostMapping("/change-password")
     public ResponseEntity<ResponseDto<Void>> changePassword(@RequestBody @Valid ChangePwRequestDto changePwRequestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        changePwRequestDto.setMid(userPrincipal.getMid());
+        changePwRequestDto.setMemberId(userPrincipal.getMemberId());
         ResponseDto<Void> responseDto = passwordService.changePassword(changePwRequestDto);
         return toResponse(responseDto);
     }

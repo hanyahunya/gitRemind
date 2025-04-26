@@ -8,14 +8,14 @@ import lombok.Setter;
 @Getter @Setter
 public class LoginRequestDto {
     @NotNull
-    private String id;
+    private String loginId;
     @NotNull
-    private String pw;
+    private String password;
 
     public Member dtoToEntity() {
         return Member.builder()
-                .id(id)
-                .pw(pw)
+                .loginId(loginId)
+                .password(password)
                 .build();
     }
 }

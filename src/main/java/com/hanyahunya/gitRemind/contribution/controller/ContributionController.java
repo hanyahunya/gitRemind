@@ -23,26 +23,26 @@ public class ContributionController {
 
     @PutMapping("/git-username")
     public ResponseEntity<ResponseDto<Void>> saveOrUpdateGitUsername(@RequestBody @Valid GitUsernameRequestDto requestDto, @AuthenticationPrincipal UserPrincipal user) {
-        requestDto.setMid(user.getMid());
+        requestDto.setMid(user.getMemberId());
         ResponseDto<Void> responseDto = contributionService.saveOrUpdateGitUsername(requestDto);
         return toResponse(responseDto);
     }
 
     @GetMapping("/alarm")
     public ResponseEntity<ResponseDto<AlarmResponseDto>> getAlarm(@AuthenticationPrincipal UserPrincipal user) {
-        ResponseDto<AlarmResponseDto> responseDto = contributionService.getAlarm(user.getMid());
+        ResponseDto<AlarmResponseDto> responseDto = contributionService.getAlarm(user.getMemberId());
         return toResponse(responseDto);
     }
     @PatchMapping("/alarm")
     public ResponseEntity<ResponseDto<Void>> setAlarm(@RequestBody @Valid AlarmRequestDto requestDto, @AuthenticationPrincipal UserPrincipal user) {
-        requestDto.setMid(user.getMid());
+        requestDto.setMid(user.getMemberId());
         ResponseDto<Void> responseDto = contributionService.setAlarm(requestDto);
         return toResponse(responseDto);
     }
 
     @GetMapping("/status")
     public ResponseEntity<ResponseDto<CommittedResponseDto>> getStatus(@AuthenticationPrincipal UserPrincipal user) {
-        ResponseDto<CommittedResponseDto> responseDto = contributionService.getCommitStatus(user.getMid());
+        ResponseDto<CommittedResponseDto> responseDto = contributionService.getCommitStatus(user.getMemberId());
         return toResponse(responseDto);
     }
 }

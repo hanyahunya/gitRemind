@@ -8,16 +8,16 @@ import lombok.Setter;
 @Getter @Setter
 public class UpdateMemberRequestDto {
     @JsonIgnore
-    private String mid;
-    private String id;
-    private String pw;
+    private String memberId;
+    private String loginId;
+    private String password;
     private String email;
 
     public Member toEntity() {
         return Member.builder()
-                .mid(mid)
-                .id(id)
-                .pw(pw)
+                .memberId(memberId)
+                .loginId(loginId)
+                .password(password)
                 .email(email)
                 .build();
     }

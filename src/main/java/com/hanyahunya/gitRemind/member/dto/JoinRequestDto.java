@@ -9,16 +9,16 @@ import lombok.Setter;
 @Setter
 public class JoinRequestDto {
     @NotNull
-    private String id;
+    private String loginId;
     @NotNull
-    private String pw;
+    private String password;
     @NotNull
     private String email;
 
     public Member dtoToEntity() {
         return Member.builder()
-                .id(this.id)
-                .pw(this.pw)
+                .loginId(this.loginId)
+                .password(this.password)
                 .email(this.email)
                 .build();
     }

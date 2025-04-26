@@ -38,7 +38,7 @@ public class SecurityConfig {
         final String[] whitelist = {
                 "/member/join", "/member/login",
                 "/member/send-code", "/member/validate-code",
-                "/auth-code", "/auth-code/validate/pw-code"
+                "/auth-code", "/auth-code/validate/password-code"
         };
 
         http

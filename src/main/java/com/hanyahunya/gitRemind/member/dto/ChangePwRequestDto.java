@@ -8,9 +8,9 @@ import lombok.Setter;
 @Getter @Setter
 public class ChangePwRequestDto {
     @JsonIgnore
-    private String mid;
+    private String memberId;
     @NotNull
-    private String oldPw;
+    private String oldPassword;
     @NotNull
-    private String newPw;
+    private String newPassword;
 }
