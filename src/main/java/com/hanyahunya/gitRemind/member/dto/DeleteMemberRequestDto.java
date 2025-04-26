@@ -8,16 +8,16 @@ import lombok.Setter;
 @Getter @Setter
 public class DeleteMemberRequestDto {
     @JsonIgnore
-    private String mid;
+    private String memberId;
     // 後に違う認証方法で変える予定
-    private String id;
-    private String pw;
+    private String loginId;
+    private String password;
 
     public Member toEntity() {
         return Member.builder()
-                .mid(mid)
-                .id(id)
-                .pw(pw)
+                .memberId(memberId)
+                .loginId(loginId)
+                .password(password)
                 .build();
     }
 }

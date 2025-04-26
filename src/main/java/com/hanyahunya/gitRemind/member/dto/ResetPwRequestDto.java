@@ -10,5 +10,5 @@ public class ResetPwRequestDto {
     @JsonIgnore
     private String email;
     @NotNull
-    private String newPw;
+    private String newPassword;
 }

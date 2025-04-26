@@ -1,3 +1,4 @@
+
 package com.hanyahunya.gitRemind.member.repository;
 
 import com.hanyahunya.gitRemind.member.entity.Member;
@@ -18,13 +19,13 @@ public class MemberRepositoryImpl implements  MemberRepository{
 
     @Override
     public boolean saveMember(Member member) {
-        final String sql = "INSERT INTO member(mid, id, pw, email) VALUES (?, ?, ?, ?)";
+        final String sql = "INSERT INTO member(member_id, login_id, password, email) VALUES (?, ?, ?, ?)";
         int updated = jdbcTemplate.update(
                 conn -> {
                     PreparedStatement ps = conn.prepareStatement(sql);
-                    ps.setString(1, member.getMid());
-                    ps.setString(2, member.getId());
-                    ps.setString(3, member.getPw());
+                    ps.setString(1, member.getMemberId());
+                    ps.setString(2, member.getLoginId());
+                    ps.setString(3, member.getPassword());
                     ps.setString(4, member.getEmail());
                     return ps;
                 });
@@ -32,23 +33,23 @@ public class MemberRepositoryImpl implements  MemberRepository{
     }
 
     @Override
-    public Optional<Member> findMemberByMid(String mid) {
-        final String sql = "SELECT pw, email, token_version FROM member WHERE mid = ?";
-        List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), mid);
+    public Optional<Member> findMemberByMemberId(String memberId) {
+        final String sql = "SELECT password, email FROM member WHERE member_id = ?";
+        List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), memberId);
         return memberList.stream().findFirst();
     }
 
     @Override
     public Optional<Member> findMemberByEmail(String email) {
-        final String sql = "SELECT mid, token_version FROM member WHERE email = ?";
+        final String sql = "SELECT member_id FROM member WHERE email = ?";
         List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), email);
         return memberList.stream().findFirst();
     }
 
     @Override
     public Optional<Member> validateMember(Member member) {
-        final String sql = "SELECT pw, mid FROM member WHERE id = ?";
-        List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), member.getId());
+        final String sql = "SELECT password, member_id FROM member WHERE login_id = ?";
+        List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), member.getLoginId());
         return memberList.stream().findFirst();
     }
 
@@ -61,20 +62,16 @@ public class MemberRepositoryImpl implements  MemberRepository{
             sqlSb.append("email = ?, ");
             parameters.add(member.getEmail());
         }
-        if (member.getPw() != null) {
-            sqlSb.append("pw = ?, ");
-            parameters.add(member.getPw());
-        }
-        if (member.getToken_version() != -1) {
-            sqlSb.append("token_version = ?, ");
-            parameters.add(member.getToken_version());
+        if (member.getPassword() != null) {
+            sqlSb.append("password = ?, ");
+            parameters.add(member.getPassword());
         }
 
         int columnSbLength = sqlSb.length();
 
-        final String sql = sqlSb.delete(columnSbLength - 2, columnSbLength).toString() + " WHERE mid = ?";
+        final String sql = sqlSb.delete(columnSbLength - 2, columnSbLength).toString() + " WHERE member_id = ?";
 
-        parameters.add(member.getMid());
+        parameters.add(member.getMemberId());
 
         Object[] parameterArray = parameters.toArray();
 
@@ -83,8 +80,9 @@ public class MemberRepositoryImpl implements  MemberRepository{
 
     @Override
     public boolean deleteMember(Member member) {
-        final String sql = "DELETE FROM member WHERE mid = ?, id = ?, pw = ?";
-        return jdbcTemplate.update(sql, member.getMid(), member.getId(), member.getPw()) > 0;
+        final String sql = "DELETE FROM member WHERE member_id = ?";
+        int updated = jdbcTemplate.update(sql, member.getMemberId());
+        return updated > 0;
     }
 
 
@@ -92,17 +90,14 @@ public class MemberRepositoryImpl implements  MemberRepository{
         String sqlColumns = sql.substring(0, sql.toLowerCase().indexOf("from"));
         return (rs, rowNum) -> {
             Member member = Member.builder().build();
-            if(sqlColumns.contains("mid")) {
-                member.setMid(rs.getString("mid"));
+            if(sqlColumns.contains("member_id")) {
+                member.setMemberId(rs.getString("member_id"));
             }
-            if (sqlColumns.contains("pw")) {
-                member.setPw(rs.getString("pw"));
+            if (sqlColumns.contains("password")) {
+                member.setPassword(rs.getString("password"));
             }
             if(sqlColumns.contains("email")) {
                 member.setEmail(rs.getString("email"));
-            }
-            if (sqlColumns.contains("token_version")) {
-                member.setToken_version(rs.getInt("token_version"));
             }
             return member;
         };

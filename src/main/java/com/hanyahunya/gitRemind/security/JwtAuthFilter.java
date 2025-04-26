@@ -1,7 +1,7 @@
     package com.hanyahunya.gitRemind.security;
 
     import com.hanyahunya.gitRemind.token.service.PwTokenService;
-    import com.hanyahunya.gitRemind.token.service.TokenService;
+    import com.hanyahunya.gitRemind.token.service.AccessTokenService;
     import io.jsonwebtoken.Claims;
     import io.jsonwebtoken.ExpiredJwtException;
     import jakarta.servlet.FilterChain;
@@ -22,7 +22,7 @@
     @Component
     @RequiredArgsConstructor
     public class JwtAuthFilter extends OncePerRequestFilter {
-        private final TokenService tokenService;
+        private final AccessTokenService accessTokenService;
         private final PwTokenService pwTokenService;
         private final StringRedisTemplate redisTemplate;
 
@@ -37,18 +37,18 @@
                 String token = authHeader.substring(7);
                 Claims claims;
                 try {
-                    claims = tokenService.getClaims(token);
+                    claims = accessTokenService.getClaims(token);
                 } catch (ExpiredJwtException e) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     return;
                 }
                 if((claims.get("purpose", String.class).equals("access"))) {
-                    if (tokenService.validateToken(token)) {
-                        String mid = claims.get("mid", String.class);
-                        if (mid != null) {
+                    if (accessTokenService.validateToken(token)) {
+                        String memberId = claims.get("member_id", String.class);
+                        if (memberId != null) {
                             // principalにmid登録
-                            UserPrincipal userPrincipal = new UserPrincipal(mid, null);
-                            // spring securityでの確認オブジェクトAuthenticationを作る　new Username~~~(ユーザーの情報、pw、権限リスト(Authorities）)
+                            UserPrincipal userPrincipal = new UserPrincipal(memberId, null);
+                            // spring securityでの確認オブジェクトAuthenticationを作る　new Username~~~(ユーザーの情報、password、権限リスト(Authorities）)
                             Authentication auth = new UsernamePasswordAuthenticationToken(userPrincipal, null, null);
                             SecurityContextHolder.getContext().setAuthentication(auth);
                         }

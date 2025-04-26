@@ -5,6 +5,7 @@ import com.hanyahunya.gitRemind.member.dto.ResetPwRequestDto;
 import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import com.hanyahunya.gitRemind.util.ResponseDto;
+import com.hanyahunya.gitRemind.util.service.EncodeService;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
@@ -12,19 +13,17 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PasswordServiceImpl implements PasswordService {
     private final MemberRepository memberRepository;
-    private final PwEncodeService pwEncodeService;
+    private final EncodeService encodeService;
 
     @Override
     public ResponseDto<Void> forgotPassword(ResetPwRequestDto resetPwRequestDto) {
-        resetPwRequestDto.setNewPw(pwEncodeService.encode(resetPwRequestDto.getNewPw()));
+        resetPwRequestDto.setNewPassword(encodeService.encode(resetPwRequestDto.getNewPassword()));
         Optional<Member> optionalMember = memberRepository.findMemberByEmail(resetPwRequestDto.getEmail());
         if(optionalMember.isPresent()) {
             Member dbMember = optionalMember.get();
-            int updateTokenVersion = dbMember.getToken_version() + 1;
             Member member = Member.builder()
-                    .mid(dbMember.getMid())
-                    .pw(resetPwRequestDto.getNewPw())
-                    .token_version(updateTokenVersion)
+                    .memberId(dbMember.getMemberId())
+                    .password(resetPwRequestDto.getNewPassword())
                     .build();
             if(memberRepository.updateMember(member)) {
                 return ResponseDto.success("パスワード更新成功");
@@ -35,15 +34,13 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Override
     public ResponseDto<Void> changePassword(ChangePwRequestDto requestDto) {
-        Optional<Member> optionalMember = memberRepository.findMemberByMid(requestDto.getMid());
+        Optional<Member> optionalMember = memberRepository.findMemberByMemberId(requestDto.getMemberId());
         if(optionalMember.isPresent()) {
             Member dbMember = optionalMember.get();
-            int updateTokenVersion = dbMember.getToken_version() + 1;
-            if(pwEncodeService.matches(requestDto.getOldPw(), dbMember.getPw())) {
+            if(encodeService.matches(requestDto.getOldPassword(), dbMember.getPassword())) {
                 Member member = Member.builder()
-                        .mid(requestDto.getMid())
-                        .pw(pwEncodeService.encode(requestDto.getNewPw()))
-                        .token_version(updateTokenVersion)
+                        .memberId(requestDto.getMemberId())
+                        .password(encodeService.encode(requestDto.getNewPassword()))
                         .build();
                 if(memberRepository.updateMember(member)) {
                     return ResponseDto.success("パスワード修正成功");

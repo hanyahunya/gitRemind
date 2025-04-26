@@ -5,20 +5,20 @@ import com.hanyahunya.gitRemind.util.ResponseDto;
 
 public interface MemberService {
     /**
-     * @param joinRequestDto id, pw, email, git_addr必須
+     * @param joinRequestDto loginId, password, email, git_addr必須
      * @return JwtResponseDto.token(String)
      */
     ResponseDto<JwtResponseDto> join(JoinRequestDto joinRequestDto);
     // todo(04.21) delete member / update memberInfo
 
     /**
-     * @param loginRequestDto id,pw必須
+     * @param loginRequestDto loginId,pw必須
      * @return JwtResponseDto.token(String)
      */
     ResponseDto<JwtResponseDto> login(LoginRequestDto loginRequestDto);
 
     /**
-     * @param mid in UserPrincipal.mid
+     * @param mid in UserPrincipal.memberId
      * @return MemberInfoResponseDto.email, .git_addr
      */
     ResponseDto<MemberInfoResponseDto> getInfo(String mid);
