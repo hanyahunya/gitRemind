@@ -1,6 +1,7 @@
 package com.hanyahunya.gitRemind.member.service;
 
 import com.hanyahunya.gitRemind.member.dto.*;
+import com.hanyahunya.gitRemind.token.dto.JwtTokenPairResponseDto;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 
 public interface MemberService {
@@ -8,14 +9,14 @@ public interface MemberService {
      * @param joinRequestDto loginId, password, email, git_addr必須
      * @return JwtResponseDto.token(String)
      */
-    ResponseDto<JwtResponseDto> join(JoinRequestDto joinRequestDto);
+    ResponseDto<Void> join(JoinRequestDto joinRequestDto);
     // todo(04.21) delete member / update memberInfo
 
     /**
      * @param loginRequestDto loginId,pw必須
      * @return JwtResponseDto.token(String)
      */
-    ResponseDto<JwtResponseDto> login(LoginRequestDto loginRequestDto);
+    ResponseDto<JwtTokenPairResponseDto> login(LoginRequestDto loginRequestDto);
 
     /**
      * @param mid in UserPrincipal.memberId

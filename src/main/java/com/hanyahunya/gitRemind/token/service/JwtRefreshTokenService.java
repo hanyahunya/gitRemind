@@ -5,12 +5,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-public class JwtPwTokenService implements PwTokenService {
-    @Value("${GIT_REMIND_JWT_KEY}")
+public class JwtRefreshTokenService implements RefreshTokenService {
+
+    @Value("${jwt.refreshToken.secret}")
     private String jwtKey;
 
     private SecretKey key;
@@ -20,15 +22,15 @@ public class JwtPwTokenService implements PwTokenService {
         key = Keys.hmacShaKeyFor(jwtKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    private static final long EXPIRATION_TIME = 1000 * 60 * 5;
+    @Value("${jwt.refreshToken.expiration}")
+    private long expirationTime;
 
     @Override
-    public String generateToken(String email) {
+    public String generateToken() {
         return Jwts.builder()
-                .claim("purpose", "password_reset")
-                .claim("email", email)
+                .claim("purpose", "refresh")
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key)
                 .compact();
     }
