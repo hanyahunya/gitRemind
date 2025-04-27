@@ -1,24 +1,18 @@
 package com.hanyahunya.gitRemind.token.service;
 
-import com.hanyahunya.gitRemind.member.entity.Member;
-import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-@RequiredArgsConstructor
-public class JwtTokenService implements AccessTokenService {
-    private final MemberRepository memberRepository;
+public class JwtAccessTokenService implements AccessTokenService {
 
-
-    @Value("${GIT_REMIND_JWT_KEY}")
+    @Value("${jwt.accessToken.secret}")
     private String jwtKey;
 
     private SecretKey key;
@@ -28,22 +22,23 @@ public class JwtTokenService implements AccessTokenService {
         key = Keys.hmacShaKeyFor(jwtKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    private static final long EXPIRATION_TIME = 60 * 60 * 24 * 7;
+    @Value("${jwt.accessToken.expiration}")
+    private long expirationTime;
+
 
     @Override
-    public String generateToken(Member member) {
+    public String generateToken(String memberId) {
         return Jwts.builder()
                 .claim("purpose", "access")
-                .claim("member_id", member.getMemberId())
+                .claim("member_id", memberId)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key)
                 .compact();
     }
 
     @Override
     public boolean validateToken(String token) {
-        // Tokenの有効期限とTokenVersionの一致を確認
         return !isTokenExpired(getClaims(token).getExpiration());
     }
 

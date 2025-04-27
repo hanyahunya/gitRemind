@@ -1,7 +1,10 @@
 package com.hanyahunya.gitRemind.member.service;
 
 import com.hanyahunya.gitRemind.member.dto.*;
+import com.hanyahunya.gitRemind.token.dto.JwtTokenPairResponseDto;
 import com.hanyahunya.gitRemind.token.service.AccessTokenService;
+import com.hanyahunya.gitRemind.token.service.RefreshTokenService;
+import com.hanyahunya.gitRemind.token.service.TokenService;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
@@ -14,11 +17,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
-    private final AccessTokenService accessTokenService;
+    private final TokenService tokenService;
     private final EncodeService encodeService;
 
     @Override
-    public ResponseDto<JwtResponseDto> join(JoinRequestDto joinRequestDto) {
+    public ResponseDto<Void> join(JoinRequestDto joinRequestDto) {
         UUID uuid = UUID.randomUUID();
         Member member = joinRequestDto.dtoToEntity();
         member.setMemberId(uuid.toString());
@@ -26,21 +29,21 @@ public class MemberServiceImpl implements MemberService {
         member.setPassword(encodeService.encode(member.getPassword()));
         boolean success = memberRepository.saveMember(member);
         if (success) {
-            String token = accessTokenService.generateToken(member);
-            return ResponseDto.success("会員登録成功", JwtResponseDto.set(token));
+            return ResponseDto.success("会員登録成功");
         } else {
             return ResponseDto.fail("会員登録失敗", null);
         }
     }
 
     @Override
-    public ResponseDto<JwtResponseDto> login(LoginRequestDto loginRequestDto) {
+    public ResponseDto<JwtTokenPairResponseDto> login(LoginRequestDto loginRequestDto) {
         Optional<Member> optionalMember = memberRepository.validateMember(loginRequestDto.dtoToEntity());
         if (optionalMember.isPresent()) {
             String reqPw = loginRequestDto.getPassword();
             Member member = optionalMember.get();
             if (encodeService.matches(reqPw, member.getPassword())) {
-                return ResponseDto.success("ログイン成功", JwtResponseDto.set(accessTokenService.generateToken(member)));
+                ResponseDto<JwtTokenPairResponseDto> responseDto = tokenService.issueTokens(member.getMemberId());
+                return ResponseDto.success("ログイン成功", responseDto.getData());
             } else {
                 return ResponseDto.fail("ログイン失敗");
             }

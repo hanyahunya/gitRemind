@@ -8,13 +8,15 @@ import com.hanyahunya.gitRemind.contribution.service.SchedulerService;
 import com.hanyahunya.gitRemind.infrastructure.email.SendEmailService;
 import com.hanyahunya.gitRemind.infrastructure.email.SendEmailServiceImpl;
 import com.hanyahunya.gitRemind.infrastructure.github.GithubHtmlScraper;
+import com.hanyahunya.gitRemind.member.TokenCookieHeaderGenerator;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import com.hanyahunya.gitRemind.member.repository.MemberRepositoryImpl;
 import com.hanyahunya.gitRemind.member.service.*;
-import com.hanyahunya.gitRemind.token.service.JwtPwTokenService;
-import com.hanyahunya.gitRemind.token.service.JwtTokenService;
-import com.hanyahunya.gitRemind.token.service.PwTokenService;
-import com.hanyahunya.gitRemind.token.service.AccessTokenService;
+import com.hanyahunya.gitRemind.token.repository.MemberTokenRepository;
+import com.hanyahunya.gitRemind.token.repository.MemberTokenRepositoryImpl;
+import com.hanyahunya.gitRemind.token.repository.TokenRepository;
+import com.hanyahunya.gitRemind.token.repository.TokenRepositoryImpl;
+import com.hanyahunya.gitRemind.token.service.*;
 import com.hanyahunya.gitRemind.util.service.BCryptEncodeService;
 import com.hanyahunya.gitRemind.util.service.EncodeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +41,19 @@ public class AppConfig {
 
     // ここからmemberパッケージ
     @Bean
+    public TokenCookieHeaderGenerator tokenCookieHeaderGenerator() {
+        return new TokenCookieHeaderGenerator();
+    }
+    @Bean
     public MemberService memberService() {
-        return new MemberServiceImpl(memberRepository(), tokenService(), pwEncodeService());
+        return new MemberServiceImpl(memberRepository(), tokenService(), encodeService());
     }
     @Bean
     public PasswordService passwordService() {
-        return new PasswordServiceImpl(memberRepository(), pwEncodeService());
+        return new PasswordServiceImpl(memberRepository(), encodeService());
     }
     @Bean
-    public EncodeService pwEncodeService() {
+    public EncodeService encodeService() {
         return new BCryptEncodeService();
     }
     @Bean
@@ -73,12 +79,28 @@ public class AppConfig {
 
     // ここからtokenパッケージ
     @Bean
-    public AccessTokenService tokenService() {
-        return new JwtTokenService(memberRepository());
+    public TokenService tokenService() {
+        return new TokenServiceImpl(tokenRepository(), memberTokenRepository(), accessTokenService(), refreshTokenService());
+    }
+    @Bean
+    public AccessTokenService accessTokenService() {
+        return new JwtAccessTokenService();
+    }
+    @Bean
+    RefreshTokenService refreshTokenService() {
+        return new JwtRefreshTokenService();
     }
     @Bean
     public PwTokenService pwTokenService() {
         return new JwtPwTokenService();
+    }
+    @Bean
+    public TokenRepository tokenRepository() {
+        return new TokenRepositoryImpl(dataSource);
+    }
+    @Bean
+    public MemberTokenRepository memberTokenRepository() {
+        return new MemberTokenRepositoryImpl(dataSource);
     }
     // ここまでtokenパッケージ
 
