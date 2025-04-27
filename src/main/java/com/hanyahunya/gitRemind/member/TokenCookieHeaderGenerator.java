@@ -17,13 +17,7 @@ public class TokenCookieHeaderGenerator {
         cookie.setPath("/");
         cookie.setMaxAge((int) (accessTokenExpirationTime / 1000));
 
-        return String.format(
-                "%s=%s; Max-Age=%d; Path=%s; HttpOnly; Secure; SameSite=Lax",
-                cookie.getName(),
-                cookie.getValue(),
-                cookie.getMaxAge(),
-                cookie.getPath()
-        );
+        return buildCookieHeader(cookie);
     }
 
     public String buildByRefreshToken(String refreshToken) {
@@ -33,13 +27,28 @@ public class TokenCookieHeaderGenerator {
         cookie.setPath("/");
         cookie.setMaxAge((int) (refreshTokenExpirationTime / 1000));
 
-        return String.format(
-                "%s=%s; Max-Age=%d; Path=%s; HttpOnly; Secure; SameSite=Lax",
+        return buildCookieHeader(cookie);
+    }
+
+    private String buildCookieHeader(Cookie cookie) {
+        StringBuilder header = new StringBuilder();
+
+        header.append(String.format(
+                "%s=%s; Max-Age=%d; Path=%s; SameSite=Lax",
                 cookie.getName(),
                 cookie.getValue(),
                 cookie.getMaxAge(),
                 cookie.getPath()
-        );
+        ));
+
+        if (cookie.isHttpOnly()) {
+            header.append("; HttpOnly");
+        }
+        if (cookie.getSecure()) {
+            header.append("; Secure");
+        }
+
+        return header.toString();
     }
 
 }

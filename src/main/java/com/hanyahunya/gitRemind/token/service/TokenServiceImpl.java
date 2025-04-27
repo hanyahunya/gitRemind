@@ -6,6 +6,7 @@ import com.hanyahunya.gitRemind.token.entity.Token;
 import com.hanyahunya.gitRemind.token.repository.MemberTokenRepository;
 import com.hanyahunya.gitRemind.token.repository.TokenRepository;
 import com.hanyahunya.gitRemind.util.ResponseDto;
+import com.hanyahunya.gitRemind.util.service.EncodeService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ public class TokenServiceImpl implements TokenService {
     private final MemberTokenRepository memberTokenRepository;
     private final AccessTokenService accessTokenService;
     private final RefreshTokenService refreshTokenService;
+    private final EncodeService encodeService;
 
     @Override
     @Transactional
@@ -33,6 +35,8 @@ public class TokenServiceImpl implements TokenService {
                 .build();
         addAccessExpiry(token);
         addRefreshExpiry(token);
+        token.setAccess_token(encodeService.encode(accessToken));
+        token.setRefresh_token(encodeService.encode(refreshToken));
         JwtTokenPairResponseDto responseDto = JwtTokenPairResponseDto.set(accessToken, refreshToken);
         try{
             if (!tokenRepository.saveToken(token)) {

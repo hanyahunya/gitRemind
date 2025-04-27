@@ -17,8 +17,8 @@ import com.hanyahunya.gitRemind.token.repository.MemberTokenRepositoryImpl;
 import com.hanyahunya.gitRemind.token.repository.TokenRepository;
 import com.hanyahunya.gitRemind.token.repository.TokenRepositoryImpl;
 import com.hanyahunya.gitRemind.token.service.*;
-import com.hanyahunya.gitRemind.util.service.BCryptEncodeService;
 import com.hanyahunya.gitRemind.util.service.EncodeService;
+import com.hanyahunya.gitRemind.util.service.PBKDF2EncodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +38,12 @@ public class AppConfig {
         this.javaMailSender = javaMailSender;
         this.templateEngine = templateEngine;
     }
+    // ここからutilパッケージ
+    @Bean
+    public EncodeService encodeService() {
+        return new PBKDF2EncodeService();
+    }
+    // ここまでutilパッケージ
 
     // ここからmemberパッケージ
     @Bean
@@ -51,10 +57,6 @@ public class AppConfig {
     @Bean
     public PasswordService passwordService() {
         return new PasswordServiceImpl(memberRepository(), encodeService());
-    }
-    @Bean
-    public EncodeService encodeService() {
-        return new BCryptEncodeService();
     }
     @Bean
     public MemberRepository memberRepository() {
@@ -80,7 +82,7 @@ public class AppConfig {
     // ここからtokenパッケージ
     @Bean
     public TokenService tokenService() {
-        return new TokenServiceImpl(tokenRepository(), memberTokenRepository(), accessTokenService(), refreshTokenService());
+        return new TokenServiceImpl(tokenRepository(), memberTokenRepository(), accessTokenService(), refreshTokenService(), encodeService());
     }
     @Bean
     public AccessTokenService accessTokenService() {
