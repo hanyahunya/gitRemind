@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 public class JwtPwTokenService implements PwTokenService {
-    @Value("${GIT_REMIND_JWT_KEY}")
+    @Value("${jwt.pwToken.secret}")
     private String jwtKey;
 
     private SecretKey key;
@@ -20,7 +20,8 @@ public class JwtPwTokenService implements PwTokenService {
         key = Keys.hmacShaKeyFor(jwtKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    private static final long EXPIRATION_TIME = 1000 * 60 * 5;
+    @Value("${jwt.pwToken.expiration}")
+    private long expirationTime;
 
     @Override
     public String generateToken(String email) {
@@ -28,7 +29,7 @@ public class JwtPwTokenService implements PwTokenService {
                 .claim("purpose", "password_reset")
                 .claim("email", email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key)
                 .compact();
     }
