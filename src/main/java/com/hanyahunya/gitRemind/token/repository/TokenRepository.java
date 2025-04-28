@@ -10,4 +10,8 @@ public interface TokenRepository {
 //    Optional<Token> findTokenByTokenId(String tokenId);
 
     boolean updateToken(Token token);
+
+    Optional<Token> findByTokenId(String tokenId);
+
+    boolean deleteByTokenId(String tokenId);
 }

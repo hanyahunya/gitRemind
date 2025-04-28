@@ -1,9 +1,11 @@
 package com.hanyahunya.gitRemind.token.repository;
 
+import com.hanyahunya.gitRemind.token.entity.MemberToken;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
+import java.util.Optional;
 
 public class MemberTokenRepositoryImpl implements MemberTokenRepository {
     private final JdbcTemplate jdbcTemplate;
@@ -22,5 +24,11 @@ public class MemberTokenRepositoryImpl implements MemberTokenRepository {
             return ps;
         });
         return updated > 0;
+    }
+
+    @Override
+    public String findMemberIdByTokenId(String tokenId) {
+        final String sql = "SELECT member_id FROM member_token WHERE token_id = ?";
+        return jdbcTemplate.queryForObject(sql, String.class, tokenId);
     }
 }

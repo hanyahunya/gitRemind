@@ -7,6 +7,9 @@ import org.springframework.jdbc.core.RowMapper;
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class TokenRepositoryImpl implements TokenRepository {
     private final JdbcTemplate jdbcTemplate;
@@ -32,7 +35,43 @@ public class TokenRepositoryImpl implements TokenRepository {
 
     @Override
     public boolean updateToken(Token token) {
-        return false;
+        StringBuilder sqlSb = new StringBuilder("UPDATE token SET ");
+        List<Object> params = new ArrayList<>();
+
+        if (token.getAccess_token() != null) {
+            sqlSb.append("access_token = ?, ");
+            params.add(token.getAccess_token());
+        }
+        if (token.getRefresh_token() != null) {
+            sqlSb.append("refresh_token = ?, ");
+            params.add(token.getRefresh_token());
+        }
+        if (token.getAccess_token_expiry() != null) {
+            sqlSb.append("access_token_expiry = ?, ");
+            params.add(token.getAccess_token_expiry());
+        }
+        if (token.getRefresh_token_expiry() != null) {
+            sqlSb.append("refresh_token_expiry = ?, ");
+            params.add(token.getRefresh_token_expiry());
+        }
+        int sqlSbLength = sqlSb.length();
+        final String sql =  sqlSb.delete(sqlSbLength - 2, sqlSbLength).toString() + " WHERE token_id = ?";
+        params.add(token.getToken_id());
+
+        return jdbcTemplate.update(sql, params.toArray()) > 0;
+    }
+
+    @Override
+    public Optional<Token> findByTokenId(String tokenId) {
+        final String sql = "SELECT token_id, access_token, refresh_token, access_token_expiry FROM token WHERE token_id = ?";
+        List<Token> rows = jdbcTemplate.query(sql, tokenRowMapper(sql), tokenId);
+        return rows.stream().findFirst();
+    }
+
+    @Override
+    public boolean deleteByTokenId(String tokenId) {
+        final String sql = "DELETE FROM token WHERE token_id = ?";
+        return jdbcTemplate.update(sql, tokenId) > 0;
     }
 
     private RowMapper<Token> tokenRowMapper(String sql) {

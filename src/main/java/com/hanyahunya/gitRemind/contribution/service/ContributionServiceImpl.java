@@ -46,7 +46,7 @@ public class ContributionServiceImpl implements ContributionService {
     @Override
     public ResponseDto<Void> setAlarm(AlarmRequestDto requestDto) {
         Contribution contribution = Contribution.builder()
-                .mid(requestDto.getMid())
+                .memberId(requestDto.getMid())
                 .alarmBit(AlarmTimeBitConverter.hourToBit(requestDto.getAlarmHours()))
                 .build();
         if (contributionRepository.updateContribution(contribution)) {

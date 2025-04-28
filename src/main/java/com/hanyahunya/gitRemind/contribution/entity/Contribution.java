@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Contribution {
-    private String mid;
+    private String memberId;
     private String gitUsername;
     @Builder.Default
     private int alarmBit = -1;

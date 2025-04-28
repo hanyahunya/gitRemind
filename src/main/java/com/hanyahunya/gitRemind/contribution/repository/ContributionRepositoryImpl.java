@@ -16,9 +16,9 @@ public class ContributionRepositoryImpl implements ContributionRepository {
     }
 
     @Override
-    public Optional<Contribution> getContributionByMid(String mid) {
-        final String sql = "SELECT git_username, alarm_hour_bit, is_today_committed FROM member WHERE mid = ?";
-        List<Contribution> rows = jdbcTemplate.query(sql, contributionRowMapper(sql), mid);
+    public Optional<Contribution> getContributionByMid(String memberId) {
+        final String sql = "SELECT git_username, alarm_hour_bit, is_today_committed FROM member WHERE member_id = ?";
+        List<Contribution> rows = jdbcTemplate.query(sql, contributionRowMapper(sql), memberId);
         return rows.stream().findAny();
     }
 
@@ -45,10 +45,11 @@ public class ContributionRepositoryImpl implements ContributionRepository {
         if (contribution.getCommitted() != null) {
             sqlSb.append("is_today_committed = ?, ");
             parameters.add(contribution.getCommitted());
+            parameters.add(contribution.getCommitted());
         }
         int sbLength = sqlSb.length();
-        final String sql = sqlSb.delete(sbLength - 2, sbLength).toString() + " WHERE mid = ?";
-        parameters.add(contribution.getMid());
+        final String sql = sqlSb.delete(sbLength - 2, sbLength).toString() + " WHERE member_id = ?";
+        parameters.add(contribution.getMemberId());
 
         Object[] parameterArray = parameters.toArray();
         return (jdbcTemplate.update(sql, parameterArray) > 0);
@@ -56,7 +57,7 @@ public class ContributionRepositoryImpl implements ContributionRepository {
 
     @Override
     public List<Contribution> findAllContributions() {
-        final String sql = "SELECT mid, email, git_username, alarm_hour_bit, is_today_committed FROM member WHERE is_today_committed = false";
+        final String sql = "SELECT member_id, email, git_username, alarm_hour_bit, is_today_committed FROM member WHERE is_today_committed = false AND git_username is not null";
         return jdbcTemplate.query(sql, contributionRowMapper(sql));
     }
 
@@ -64,8 +65,8 @@ public class ContributionRepositoryImpl implements ContributionRepository {
         String sqlColumns = sql.substring(0, sql.toLowerCase().indexOf("from"));
         return (rs, rowNum) -> {
             Contribution contribution = Contribution.builder().build();
-            if (sqlColumns.contains("mid")) {
-                contribution.setMid(rs.getString("mid"));
+            if (sqlColumns.contains("member_id")) {
+                contribution.setMemberId(rs.getString("member_id"));
             }
             if (sqlColumns.contains("git_username")) {
                 contribution.setGitUsername(rs.getString("git_username"));

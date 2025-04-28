@@ -15,7 +15,7 @@ public class GitUsernameRequestDto {
 
     public Contribution toEntity() {
         return Contribution.builder()
-                .mid(mid)
+                .memberId(mid)
                 .gitUsername(gitUsername)
                 .build();
     }
