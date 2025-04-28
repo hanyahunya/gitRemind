@@ -40,11 +40,13 @@ public class SchedulerService {
 
         for (Contribution contribution : contributionList) {
             futures.add(executorService.submit(() -> {
+                String threadName = Thread.currentThread().getName();
+                log.info("Thread {} started", threadName);
                 try {
                     if (AlarmTimeBitConverter.bitToHourSet(contribution.getAlarmBit()).contains(hour)) {
                         if (githubHtmlScraper.getTodayContributionCount(contribution.getGitUsername()) > 0) {
                             Contribution updateContribution = Contribution.builder()
-                                    .mid(contribution.getMid())
+                                    .memberId(contribution.getMemberId())
                                     .committed(true)
                                     .build();
                             contributionRepository.updateContribution(updateContribution);
@@ -58,6 +60,7 @@ public class SchedulerService {
                 } catch (Exception e) {
                     log.warn("{}-{}", this.getClass().getSimpleName(), e.getClass().getSimpleName());
                 }
+                log.info("Thread {} finishid", threadName);
                 return null;
             }));
         }

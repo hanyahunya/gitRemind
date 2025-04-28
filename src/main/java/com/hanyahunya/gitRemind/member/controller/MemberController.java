@@ -1,6 +1,6 @@
 package com.hanyahunya.gitRemind.member.controller;
 
-import com.hanyahunya.gitRemind.member.TokenCookieHeaderGenerator;
+import com.hanyahunya.gitRemind.util.TokenCookieHeaderGenerator;
 import com.hanyahunya.gitRemind.token.dto.JwtTokenPairResponseDto;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.dto.*;

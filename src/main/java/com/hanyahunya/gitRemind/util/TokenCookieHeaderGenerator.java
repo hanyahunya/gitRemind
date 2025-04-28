@@ -1,31 +1,49 @@
-package com.hanyahunya.gitRemind.member;
+package com.hanyahunya.gitRemind.util;
 
 import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
 
 public class TokenCookieHeaderGenerator {
 
-    @Value("${jwt.accessToken.expiration}")
-    private long accessTokenExpirationTime;
+//    @Value("${jwt.accessToken.expiration}")
+//    private long accessTokenExpirationTime;
     @Value("${jwt.refreshToken.expiration}")
     private long refreshTokenExpirationTime;
 
     public String buildByAccessToken(String accessToken) {
-        Cookie cookie = new Cookie("accessToken", accessToken);
+        Cookie cookie = new Cookie("access_token", accessToken);
         cookie.setHttpOnly(true); // JSでアクセス不可
 //        cookie.setSecure(true); // HTTPS通信のみ送る
         cookie.setPath("/");
-        cookie.setMaxAge((int) (accessTokenExpirationTime / 1000));
+        cookie.setMaxAge((int) (refreshTokenExpirationTime / 1000));
 
         return buildCookieHeader(cookie);
     }
 
     public String buildByRefreshToken(String refreshToken) {
-        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        Cookie cookie = new Cookie("refresh_token", refreshToken);
         cookie.setHttpOnly(true);
 //        cookie.setSecure(true); // HTTPS通信のみ送る
         cookie.setPath("/");
         cookie.setMaxAge((int) (refreshTokenExpirationTime / 1000));
+
+        return buildCookieHeader(cookie);
+    }
+
+    public String deleteAccessToken() {
+        Cookie cookie = new Cookie("access_token", "");
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+
+        return buildCookieHeader(cookie);
+    }
+
+    public String deleteRefreshToken() {
+        Cookie cookie = new Cookie("refresh_token", "");
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
 
         return buildCookieHeader(cookie);
     }
