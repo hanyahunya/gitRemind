@@ -4,7 +4,9 @@
     import com.hanyahunya.gitRemind.token.service.AccessTokenService;
     import com.hanyahunya.gitRemind.token.service.RefreshTokenService;
     import com.hanyahunya.gitRemind.token.service.TokenService;
+    import com.hanyahunya.gitRemind.util.TokenCookieHeaderGenerator;
     import io.jsonwebtoken.Claims;
+    import io.jsonwebtoken.ExpiredJwtException;
     import jakarta.servlet.FilterChain;
     import jakarta.servlet.ServletException;
     import jakarta.servlet.http.Cookie;
@@ -12,6 +14,7 @@
     import jakarta.servlet.http.HttpServletResponse;
     import lombok.RequiredArgsConstructor;
     import org.springframework.data.redis.core.StringRedisTemplate;
+    import org.springframework.http.HttpHeaders;
     import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
     import org.springframework.security.core.Authentication;
     import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,24 +27,20 @@
     @RequiredArgsConstructor
     public class JwtAuthFilter extends OncePerRequestFilter {
         private final AccessTokenService accessTokenService;
+        private final TokenCookieHeaderGenerator tokenCookieHeaderGenerator;
         private final RefreshTokenService refreshTokenService;
         private final TokenService tokenService;
         private final PwTokenService pwTokenService;
         private final StringRedisTemplate redisTemplate;
 
-        //todo(04.21) make refresh token.
-        //todo(04.21) tokenをHttpOnlyのクッキーに入れて応答
         @Override
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
             String accessToken = null;
-            String refreshToken = null;
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if (cookie.getName().equals("access_token")) {
                         accessToken = cookie.getValue();
-                    } else if (cookie.getName().equals("refresh_token")) {
-                        refreshToken = cookie.getValue();
                     }
                 }
             }
@@ -49,26 +48,33 @@
                 filterChain.doFilter(request, response);
                 return;
             }
-            if (refreshToken != null) {
+            Claims claims;
+            try {
+                claims = accessTokenService.getClaims(accessToken);
+            } catch (ExpiredJwtException e) {
                 filterChain.doFilter(request, response);
                 return;
-            }
-
-            if (accessTokenService.validateToken(accessToken)) {
-                Claims claims = accessTokenService.getClaims(accessToken);
-                String memberId = claims.get("member_id", String.class);
-                if (memberId != null) {
-                    // principalにmid登録
-                    UserPrincipal userPrincipal = new UserPrincipal(memberId, null);
-                    // spring securityでの確認オブジェクトAuthenticationを作る　new Username~~~(ユーザーの情報、password、権限リスト(Authorities）)
-                    Authentication auth = new UsernamePasswordAuthenticationToken(userPrincipal, null, null);
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                }
-            } else {
+            } catch (RuntimeException e) {
+                String deleteAccessToken = tokenCookieHeaderGenerator.deleteAccessToken();
+                String deleteRefreshToken = tokenCookieHeaderGenerator.deleteRefreshToken();
+                response.addHeader(HttpHeaders.SET_COOKIE, deleteAccessToken);
+                response.addHeader(HttpHeaders.SET_COOKIE, deleteRefreshToken);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
+
+            String memberId = claims.get("member_id", String.class);
+            if (memberId != null) {
+                // principalにmid登録
+                UserPrincipal userPrincipal = new UserPrincipal(memberId, null);
+                // spring securityでの確認オブジェクトAuthenticationを作る　new Username~~~(ユーザーの情報、password、権限リスト(Authorities）)
+                Authentication auth = new UsernamePasswordAuthenticationToken(userPrincipal, null, null);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
+
             filterChain.doFilter(request, response);
+        }
+    }
 
 //            String authHeader = request.getHeader("Authorization");
 //
@@ -112,5 +118,4 @@
 //
 //            }
 //            filterChain.doFilter(request, response);
-        }
-    }
+
