@@ -8,7 +8,7 @@ import com.hanyahunya.gitRemind.contribution.service.SchedulerService;
 import com.hanyahunya.gitRemind.infrastructure.email.SendEmailService;
 import com.hanyahunya.gitRemind.infrastructure.email.SendEmailServiceImpl;
 import com.hanyahunya.gitRemind.infrastructure.github.GithubHtmlScraper;
-import com.hanyahunya.gitRemind.util.TokenCookieHeaderGenerator;
+import com.hanyahunya.gitRemind.util.cookieHeader.TokenCookieHeaderGenerator;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import com.hanyahunya.gitRemind.member.repository.MemberRepositoryImpl;
 import com.hanyahunya.gitRemind.member.service.*;

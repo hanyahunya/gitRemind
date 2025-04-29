@@ -3,6 +3,7 @@ package com.hanyahunya.gitRemind.member.service;
 import com.hanyahunya.gitRemind.member.dto.*;
 import com.hanyahunya.gitRemind.token.dto.JwtTokenPairResponseDto;
 import com.hanyahunya.gitRemind.util.ResponseDto;
+import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
 
 public interface MemberService {
     /**
@@ -16,7 +17,7 @@ public interface MemberService {
      * @param loginRequestDto loginId,pw必須
      * @return JwtResponseDto.token(String)
      */
-    ResponseDto<JwtTokenPairResponseDto> login(LoginRequestDto loginRequestDto);
+    SetResultDto login(LoginRequestDto loginRequestDto);
 
     /**
      * @param mid in UserPrincipal.memberId

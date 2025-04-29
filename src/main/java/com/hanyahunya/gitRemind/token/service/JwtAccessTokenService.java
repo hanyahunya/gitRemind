@@ -34,7 +34,7 @@ public class JwtAccessTokenService implements AccessTokenService {
         return Jwts.builder()
                 .claim("member_id", memberId)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationTime))
+                .expiration(new Date(System.currentTimeMillis() + 10000))
                 .signWith(key)
                 .compact();
     }
@@ -44,26 +44,18 @@ public class JwtAccessTokenService implements AccessTokenService {
         try {
             getClaims(token);
             return true;
-        } catch (RuntimeException e) {
+        } catch (JwtException e) {
             return false;
         }
     }
 
     @Override
     public Claims getClaims(String token) {
-        try {
-            return Jwts.parser()
-                    .verifyWith(key)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-        } catch (ExpiredJwtException e) {
-            throw new RuntimeException("Token有効期限切れ");
-        } catch (SignatureException e) {
-            throw new RuntimeException("Tokenキー認証失敗");
-        } catch (JwtException e) {
-            throw new RuntimeException("Token認証失敗");
-        }
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     @Override

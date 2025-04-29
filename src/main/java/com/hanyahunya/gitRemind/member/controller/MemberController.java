@@ -1,7 +1,7 @@
 package com.hanyahunya.gitRemind.member.controller;
 
-import com.hanyahunya.gitRemind.util.TokenCookieHeaderGenerator;
-import com.hanyahunya.gitRemind.token.dto.JwtTokenPairResponseDto;
+import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
+import com.hanyahunya.gitRemind.util.cookieHeader.TokenCookieHeaderGenerator;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.dto.*;
 import com.hanyahunya.gitRemind.member.service.MemberService;
@@ -32,16 +32,12 @@ public class MemberController {
 
     @PostMapping("/login")
     public ResponseEntity<ResponseDto<Void>> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
-        ResponseDto<JwtTokenPairResponseDto> responseDto = memberService.login(loginRequestDto);
-        if (responseDto.isSuccess()) {
-            String accessTokenHeader = tokenCookieHeaderGenerator.buildByAccessToken(responseDto.getData().getAccessToken());
-            String refreshTokenHeader = tokenCookieHeaderGenerator.buildByRefreshToken(responseDto.getData().getRefreshToken());
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.SET_COOKIE, accessTokenHeader);
-            headers.add(HttpHeaders.SET_COOKIE, refreshTokenHeader);
-            return toResponseWithHeader(ResponseDto.success(responseDto.getMessage()), headers);
+        SetResultDto setResultDto = memberService.login(loginRequestDto);
+        if (setResultDto.isSuccess()) {
+            HttpHeaders headers = tokenCookieHeaderGenerator.handleTokenHeader(setResultDto);
+            return toResponseWithHeader(ResponseDto.success("success"), headers);
         } else {
-            return toResponse(ResponseDto.fail(responseDto.getMessage()));
+            return toResponse(ResponseDto.fail("fail"));
         }
     }
 

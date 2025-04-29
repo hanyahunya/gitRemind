@@ -22,7 +22,9 @@ public class ResponseUtil {
                     .headers(headers)
                     .body(responseDto);
         } else {
-            return ResponseEntity.badRequest().body(responseDto);
+            return ResponseEntity.badRequest()
+                    .headers(headers)
+                    .body(responseDto);
         }
     }
 }
