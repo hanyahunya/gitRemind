@@ -3,7 +3,8 @@ package com.hanyahunya.gitRemind.token;
 import com.hanyahunya.gitRemind.token.service.RefreshTokenService;
 import com.hanyahunya.gitRemind.token.service.TokenService;
 import com.hanyahunya.gitRemind.util.ResponseDto;
-import com.hanyahunya.gitRemind.util.TokenCookieHeaderGenerator;
+import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
+import com.hanyahunya.gitRemind.util.cookieHeader.TokenCookieHeaderGenerator;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -37,9 +38,14 @@ public class TokenController {
             }
         }
         if (accessToken != null && refreshToken != null) {
-            HttpHeaders headers = tokenService.refreshAccessToken(accessToken, refreshToken);
-            if (headers != null) {
-                return toResponseWithHeader(ResponseDto.success("Access token 更新成功"), headers);
+            SetResultDto setResultDto = tokenService.refreshAccessToken(accessToken, refreshToken);
+            if (setResultDto != null) {
+                HttpHeaders headers = tokenCookieHeaderGenerator.handleTokenHeader(setResultDto);
+                if (setResultDto.isSuccess()) {
+                    return toResponseWithHeader(ResponseDto.success("Access token 更新成功"), headers);
+                } else {
+                    return toResponseWithHeader(ResponseDto.fail("Access token 更新失敗"), headers);
+                }
             }
         }
         return toResponse(ResponseDto.fail("Access token 更新失敗"));

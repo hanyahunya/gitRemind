@@ -2,12 +2,11 @@ package com.hanyahunya.gitRemind.member.service;
 
 import com.hanyahunya.gitRemind.member.dto.*;
 import com.hanyahunya.gitRemind.token.dto.JwtTokenPairResponseDto;
-import com.hanyahunya.gitRemind.token.service.AccessTokenService;
-import com.hanyahunya.gitRemind.token.service.RefreshTokenService;
 import com.hanyahunya.gitRemind.token.service.TokenService;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
+import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
 import com.hanyahunya.gitRemind.util.service.EncodeService;
 import lombok.RequiredArgsConstructor;
 
@@ -36,20 +35,19 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public ResponseDto<JwtTokenPairResponseDto> login(LoginRequestDto loginRequestDto) {
+    public SetResultDto login(LoginRequestDto loginRequestDto) {
         Optional<Member> optionalMember = memberRepository.validateMember(loginRequestDto.dtoToEntity());
         if (optionalMember.isPresent()) {
             String reqPw = loginRequestDto.getPassword();
             Member member = optionalMember.get();
             if (encodeService.matches(reqPw, member.getPassword())) {
                 ResponseDto<JwtTokenPairResponseDto> responseDto = tokenService.issueTokens(member.getMemberId());
-                return ResponseDto.success("ログイン成功", responseDto.getData());
-            } else {
-                return ResponseDto.fail("ログイン失敗");
+                String accessToken = responseDto.getData().getAccessToken();
+                String refreshToken = responseDto.getData().getRefreshToken();
+                return SetResultDto.builder().success(true).accessToken(accessToken).refreshToken(refreshToken).build();
             }
-        } else {
-            return ResponseDto.fail("ログイン失敗");
         }
+        return SetResultDto.builder().success(false).build();
     }
 
     @Override

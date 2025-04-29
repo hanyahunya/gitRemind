@@ -1,12 +1,12 @@
 package com.hanyahunya.gitRemind.token.service;
 
 import com.hanyahunya.gitRemind.token.dto.JwtTokenPairResponseDto;
-import com.hanyahunya.gitRemind.token.dto.RefreshAccessTokenRequestDto;
 import com.hanyahunya.gitRemind.token.entity.Token;
 import com.hanyahunya.gitRemind.token.repository.MemberTokenRepository;
 import com.hanyahunya.gitRemind.token.repository.TokenRepository;
 import com.hanyahunya.gitRemind.util.ResponseDto;
-import com.hanyahunya.gitRemind.util.TokenCookieHeaderGenerator;
+import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
+import com.hanyahunya.gitRemind.util.cookieHeader.TokenCookieHeaderGenerator;
 import com.hanyahunya.gitRemind.util.service.EncodeService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -62,30 +62,31 @@ public class TokenServiceImpl implements TokenService {
     // todo (04.28) トークンの盗難が疑われる場合、[セキュリティ上の問題により、このアカウントはログアウトされました]のようなメールをユーザーに送る
     @Override
     @Transactional
-    public HttpHeaders refreshAccessToken(String oldAccessToken, String refreshToken) {
+    public SetResultDto refreshAccessToken(String oldAccessToken, String refreshToken) {
         try {
             if (!refreshTokenService.validateToken(refreshToken)) {
                 return null;
             }
             String tokenId = refreshTokenService.getClaims(refreshToken).get("token_id", String.class);
-            HttpHeaders headers = new HttpHeaders();
+//            HttpHeaders headers = new HttpHeaders();
+            SetResultDto setResultDto = SetResultDto.builder().build();
             Optional<Token> optionalToken = tokenRepository.findByTokenId(tokenId);
             if (optionalToken.isEmpty()) {
-                deleteToken(headers);
-                return headers;
+                deleteToken(setResultDto);
+                return setResultDto;
             }
             // アクセストークンの有効期限が切れてないのに更新リクエスト
             Token token = optionalToken.get();
             if (!accessTokenService.isTokenExpired(token.getAccess_token_expiry())) {
                 tokenRepository.deleteByTokenId(token.getToken_id());
-                deleteToken(headers);
-                return headers;
+                deleteToken(setResultDto);
+                return setResultDto;
             }
             // 当サーバーが以前発行したアクセストークンと一致しない
             if (!encodeService.matches(oldAccessToken, token.getAccess_token()) || !encodeService.matches(refreshToken, token.getRefresh_token())) {
                 tokenRepository.deleteByTokenId(token.getToken_id());
-                deleteToken(headers);
-                return headers;
+                deleteToken(setResultDto);
+                return setResultDto;
             }
             String memberId = memberTokenRepository.findMemberIdByTokenId(token.getToken_id());
             String newAccessToken = accessTokenService.generateToken(memberId);
@@ -97,14 +98,15 @@ public class TokenServiceImpl implements TokenService {
             addAccessExpiry(updatedToken);
             updatedToken.setAccess_token(encodeService.encode(newAccessToken));
             if (!tokenRepository.updateToken(updatedToken)) {
-                return null;
+                setResultDto.setSuccess(false);
+                return setResultDto;
             }
 
-            String deleteAccessToken = tokenCookieHeaderGenerator.deleteAccessToken();
-            String accessTokenHeader = tokenCookieHeaderGenerator.buildByAccessToken(newAccessToken);
-            headers.add(HttpHeaders.SET_COOKIE, deleteAccessToken);
-            headers.add(HttpHeaders.SET_COOKIE, accessTokenHeader);
-            return headers;
+            setResultDto.setSuccess(true);
+            setResultDto.setAccessToken(newAccessToken);
+
+            return setResultDto;
+
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error("{}-{}: {}", this.getClass().getSimpleName(), e.getClass().getSimpleName(), e.getMessage());
@@ -112,11 +114,10 @@ public class TokenServiceImpl implements TokenService {
         }
     }
 
-    private void deleteToken(HttpHeaders headers) {
-        String deleteAccessToken = tokenCookieHeaderGenerator.deleteAccessToken();
-        String deleteRefreshToken = tokenCookieHeaderGenerator.deleteRefreshToken();
-        headers.add(HttpHeaders.SET_COOKIE, deleteAccessToken);
-        headers.add(HttpHeaders.SET_COOKIE, deleteRefreshToken);
+    private void deleteToken(SetResultDto setResultDto) {
+        setResultDto.setSuccess(false);
+        setResultDto.setDeleteAccessToken(true);
+        setResultDto.setDeleteRefreshToken(true);
     }
 
     private void addAccessExpiry(Token token) {

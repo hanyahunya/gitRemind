@@ -4,7 +4,7 @@
     import com.hanyahunya.gitRemind.token.service.AccessTokenService;
     import com.hanyahunya.gitRemind.token.service.RefreshTokenService;
     import com.hanyahunya.gitRemind.token.service.TokenService;
-    import com.hanyahunya.gitRemind.util.TokenCookieHeaderGenerator;
+    import com.hanyahunya.gitRemind.util.cookieHeader.TokenCookieHeaderGenerator;
     import io.jsonwebtoken.Claims;
     import io.jsonwebtoken.ExpiredJwtException;
     import jakarta.servlet.FilterChain;
