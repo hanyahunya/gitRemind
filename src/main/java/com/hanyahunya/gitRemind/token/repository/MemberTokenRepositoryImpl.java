@@ -31,4 +31,10 @@ public class MemberTokenRepositoryImpl implements MemberTokenRepository {
         final String sql = "SELECT member_id FROM member_token WHERE token_id = ?";
         return jdbcTemplate.queryForObject(sql, String.class, tokenId);
     }
+
+    @Override
+    public boolean deleteMemberTokenByMemberId(String memberId) {
+        final String sql = "DELETE FROM member_token WHERE member_id = ?";
+        return jdbcTemplate.update(sql, memberId) >= 0;
+    }
 }

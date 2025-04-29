@@ -35,9 +35,9 @@ public class MemberController {
         SetResultDto setResultDto = memberService.login(loginRequestDto);
         if (setResultDto.isSuccess()) {
             HttpHeaders headers = tokenCookieHeaderGenerator.handleTokenHeader(setResultDto);
-            return toResponseWithHeader(ResponseDto.success("success"), headers);
+            return toResponseWithHeader(ResponseDto.success("ログイン成功"), headers);
         } else {
-            return toResponse(ResponseDto.fail("fail"));
+            return toResponse(ResponseDto.fail("ログイン失敗"));
         }
     }
 
@@ -57,7 +57,11 @@ public class MemberController {
     @DeleteMapping("/delete")
     public ResponseEntity<ResponseDto<Void>> delete(@RequestBody @Valid DeleteMemberRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         requestDto.setMemberId(userPrincipal.getMemberId());
-        ResponseDto<Void> responseDto = memberService.deleteMember(requestDto);
-        return toResponse(responseDto);
+        SetResultDto setResultDto = memberService.deleteMember(requestDto);
+        if (setResultDto.isSuccess()) {
+            HttpHeaders headers = tokenCookieHeaderGenerator.handleTokenHeader(setResultDto);
+            return toResponseWithHeader(ResponseDto.success("ユーザー退会成功"), headers);
+        }
+        return toResponse(ResponseDto.fail("ユーザー退会失敗"));
     }
 }

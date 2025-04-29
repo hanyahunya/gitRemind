@@ -11,4 +11,5 @@ public interface TokenService {
 
     SetResultDto refreshAccessToken(String refreshToken, String oldAccessToken);
 
+    public ResponseDto<Void> deleteTokenAtAllDevice(String memberId);
 }

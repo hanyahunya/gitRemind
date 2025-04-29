@@ -47,7 +47,7 @@ public class MemberServiceImpl implements MemberService {
                 return SetResultDto.builder().success(true).accessToken(accessToken).refreshToken(refreshToken).build();
             }
         }
-        return SetResultDto.builder().success(false).build();
+        return SetResultDto.builder().build();
     }
 
     @Override
@@ -60,17 +60,17 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public ResponseDto<Void> deleteMember(DeleteMemberRequestDto requestDto) {
+    public SetResultDto deleteMember(DeleteMemberRequestDto requestDto) {
         Optional<Member> optionalMember = memberRepository.validateMember(requestDto.toEntity());
         if (optionalMember.isPresent()) {
             Member dbMember = optionalMember.get();
             if (encodeService.matches(requestDto.getPassword(), dbMember.getPassword())) {
                 if(memberRepository.deleteMember(requestDto.toEntity())) {
-                    return ResponseDto.success("ユーザー退会成功");
+                    return SetResultDto.builder().deleteAccessToken(true).deleteRefreshToken(true).build();
                 }
             }
         }
-        return ResponseDto.fail("ユーザー退会失敗");
+        return SetResultDto.builder().build();
     }
 
     @Override
