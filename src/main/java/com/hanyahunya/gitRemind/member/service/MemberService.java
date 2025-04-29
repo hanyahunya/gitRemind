@@ -25,7 +25,7 @@ public interface MemberService {
      */
     ResponseDto<MemberInfoResponseDto> getInfo(String mid);
 
-    ResponseDto<Void> deleteMember(DeleteMemberRequestDto deleteMemberRequestDto);
+    SetResultDto deleteMember(DeleteMemberRequestDto deleteMemberRequestDto);
 
     ResponseDto<Void> updateMember(UpdateMemberRequestDto updateMemberRequestDto);
 }

@@ -36,7 +36,12 @@ public class JwtPwTokenService implements PwTokenService {
 
     @Override
     public boolean validateToken(String token) {
-        return !isTokenExpired(getClaims(token).getExpiration());
+        try{
+            getClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
@@ -48,7 +53,7 @@ public class JwtPwTokenService implements PwTokenService {
                 .getPayload();
     }
 
-    private boolean isTokenExpired(Date expirationDate) {
-        return expirationDate.before(new Date());
-    }
+//    private boolean isTokenExpired(Date expirationDate) {
+//        return expirationDate.before(new Date());
+//    }
 }

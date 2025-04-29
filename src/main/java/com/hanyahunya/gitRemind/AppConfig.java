@@ -56,7 +56,7 @@ public class AppConfig {
     }
     @Bean
     public PasswordService passwordService() {
-        return new PasswordServiceImpl(memberRepository(), encodeService());
+        return new PasswordServiceImpl(memberRepository(), encodeService(), tokenService());
     }
     @Bean
     public MemberRepository memberRepository() {
