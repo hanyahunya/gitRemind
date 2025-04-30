@@ -34,7 +34,7 @@ public class JwtAccessTokenService implements AccessTokenService {
         return Jwts.builder()
                 .claim("member_id", memberId)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 10000))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key)
                 .compact();
     }

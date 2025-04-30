@@ -16,8 +16,8 @@ public class ContributionRepositoryImpl implements ContributionRepository {
     }
 
     @Override
-    public Optional<Contribution> getContributionByMid(String memberId) {
-        final String sql = "SELECT git_username, alarm_hour_bit, is_today_committed FROM member WHERE member_id = ?";
+    public Optional<Contribution> getContributionByMemberId(String memberId) {
+        final String sql = "SELECT email, git_username, alarm_hour_bit, is_today_committed FROM member WHERE member_id = ?";
         List<Contribution> rows = jdbcTemplate.query(sql, contributionRowMapper(sql), memberId);
         return rows.stream().findAny();
     }
