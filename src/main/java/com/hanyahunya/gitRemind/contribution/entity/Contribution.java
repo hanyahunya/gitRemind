@@ -14,6 +14,6 @@ public class Contribution {
     private int alarmBit = -1;
     private Boolean committed;
 
-    // for scheduler only
+    // for scheduler, email関連service only
     private String email;
 }

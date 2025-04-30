@@ -82,8 +82,8 @@ public class AppConfig {
     // ここからtokenパッケージ
     @Bean
     public TokenService tokenService() {
-        return new TokenServiceImpl(tokenRepository(), memberTokenRepository(), accessTokenService(),
-                refreshTokenService(), encodeService(), tokenCookieHeaderGenerator());
+        return new TokenServiceImpl(tokenRepository(), memberTokenRepository(), contributionRepository(),
+                accessTokenService(), refreshTokenService(), encodeService(), securityAlertEmailService());
     }
     @Bean
     public AccessTokenService accessTokenService() {
@@ -96,6 +96,10 @@ public class AppConfig {
     @Bean
     public PwTokenService pwTokenService() {
         return new JwtPwTokenService();
+    }
+    @Bean
+    public SecurityAlertEmailService securityAlertEmailService() {
+        return new SecurityAlertEmailService(sendEmailService());
     }
     @Bean
     public TokenRepository tokenRepository() {

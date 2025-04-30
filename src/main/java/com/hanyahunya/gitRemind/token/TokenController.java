@@ -20,7 +20,6 @@ import static com.hanyahunya.gitRemind.util.ResponseUtil.toResponseWithHeader;
 @RequiredArgsConstructor
 public class TokenController {
     private final TokenService tokenService;
-    private final RefreshTokenService refreshTokenService;
     private final TokenCookieHeaderGenerator tokenCookieHeaderGenerator;
 
     @PostMapping("/refreshAccessToken")

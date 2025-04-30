@@ -31,8 +31,8 @@ public class ContributionServiceImpl implements ContributionService {
     }
 
     @Override
-    public ResponseDto<AlarmResponseDto> getAlarm(String mid) {
-        return contributionRepository.getContributionByMid(mid)
+    public ResponseDto<AlarmResponseDto> getAlarm(String memberId) {
+        return contributionRepository.getContributionByMemberId(memberId)
                 .map(contribution -> {
                     Set<Integer> alarmHours = AlarmTimeBitConverter.bitToHourSet(contribution.getAlarmBit());
                     return ResponseDto.success("Alarm読み込み成功", AlarmResponseDto.set(alarmHours));
@@ -57,8 +57,8 @@ public class ContributionServiceImpl implements ContributionService {
     }
 
     @Override
-    public ResponseDto<CommittedResponseDto> getCommitStatus(String mid) {
-        return contributionRepository.getContributionByMid(mid)
+    public ResponseDto<CommittedResponseDto> getCommitStatus(String memberId) {
+        return contributionRepository.getContributionByMemberId(memberId)
                 .map(contribution -> {
                     return ResponseDto.success("commit読み込み成功", CommittedResponseDto.set(contribution.getCommitted()));
                 })

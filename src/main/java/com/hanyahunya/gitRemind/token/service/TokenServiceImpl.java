@@ -1,5 +1,8 @@
 package com.hanyahunya.gitRemind.token.service;
 
+import com.hanyahunya.gitRemind.contribution.entity.Contribution;
+import com.hanyahunya.gitRemind.contribution.repository.ContributionRepository;
+import com.hanyahunya.gitRemind.infrastructure.email.SendEmailService;
 import com.hanyahunya.gitRemind.token.dto.JwtTokenPairResponseDto;
 import com.hanyahunya.gitRemind.token.entity.Token;
 import com.hanyahunya.gitRemind.token.repository.MemberTokenRepository;
@@ -23,10 +26,11 @@ import java.util.UUID;
 public class TokenServiceImpl implements TokenService {
     private final TokenRepository tokenRepository;
     private final MemberTokenRepository memberTokenRepository;
+    private final ContributionRepository contributionRepository;
     private final AccessTokenService accessTokenService;
     private final RefreshTokenService refreshTokenService;
     private final EncodeService encodeService;
-    private final TokenCookieHeaderGenerator tokenCookieHeaderGenerator;
+    private final SecurityAlertEmailService securityAlertEmailService;
 
     @Override
     @Transactional
@@ -77,18 +81,20 @@ public class TokenServiceImpl implements TokenService {
             }
             // アクセストークンの有効期限が切れてないのに更新リクエスト
             Token token = optionalToken.get();
+            String memberId = memberTokenRepository.findMemberIdByTokenId(token.getToken_id());
             if (!accessTokenService.isTokenExpired(token.getAccess_token_expiry())) {
+                sendHijackAlert(memberId);
                 tokenRepository.deleteByTokenId(token.getToken_id());
                 deleteToken(setResultDto);
                 return setResultDto;
             }
             // 当サーバーが以前発行したアクセストークンと一致しない
             if (!encodeService.matches(oldAccessToken, token.getAccess_token()) || !encodeService.matches(refreshToken, token.getRefresh_token())) {
+                sendHijackAlert(memberId);
                 tokenRepository.deleteByTokenId(token.getToken_id());
                 deleteToken(setResultDto);
                 return setResultDto;
             }
-            String memberId = memberTokenRepository.findMemberIdByTokenId(token.getToken_id());
             String newAccessToken = accessTokenService.generateToken(memberId);
 
             Token updatedToken = Token.builder()
@@ -120,6 +126,16 @@ public class TokenServiceImpl implements TokenService {
             return ResponseDto.success("すべてのデヴァイスからログアウト成功");
         } else {
             return ResponseDto.fail("すべてのデヴァイスからログアウト失敗");
+        }
+    }
+
+    private void sendHijackAlert(String memberId) {
+        Optional<Contribution> optionalContribution = contributionRepository.getContributionByMemberId(memberId);
+        if (optionalContribution.isPresent()) {
+            String email = optionalContribution.get().getEmail();
+            String gitUsername = optionalContribution.get().getGitUsername();
+            System.out.println(email + gitUsername);
+            securityAlertEmailService.sendCookieHijackingAlert(email, gitUsername);
         }
     }
 
