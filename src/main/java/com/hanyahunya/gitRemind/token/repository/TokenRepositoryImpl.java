@@ -23,11 +23,11 @@ public class TokenRepositoryImpl implements TokenRepository {
         final String sql = "INSERT INTO token (token_id, access_token, refresh_token, access_token_expiry, refresh_token_expiry) VALUES (?, ?, ?, ?, ?)";
         int updated = jdbcTemplate.update(conn -> {
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, token.getToken_id());
-            ps.setString(2, token.getAccess_token());
-            ps.setString(3, token.getRefresh_token());
-            ps.setTimestamp(4, new Timestamp(token.getAccess_token_expiry().getTime()));
-            ps.setTimestamp(5, new Timestamp(token.getRefresh_token_expiry().getTime()));
+            ps.setString(1, token.getTokenId());
+            ps.setString(2, token.getAccessToken());
+            ps.setString(3, token.getRefreshToken());
+            ps.setTimestamp(4, new Timestamp(token.getAccessTokenExpiry().getTime()));
+            ps.setTimestamp(5, new Timestamp(token.getRefreshTokenExpiry().getTime()));
             return ps;
         });
         return updated > 0;
@@ -38,26 +38,26 @@ public class TokenRepositoryImpl implements TokenRepository {
         StringBuilder sqlSb = new StringBuilder("UPDATE token SET ");
         List<Object> params = new ArrayList<>();
 
-        if (token.getAccess_token() != null) {
+        if (token.getAccessToken() != null) {
             sqlSb.append("access_token = ?, ");
-            params.add(token.getAccess_token());
+            params.add(token.getAccessToken());
         }
-        if (token.getRefresh_token() != null) {
+        if (token.getRefreshToken() != null) {
             sqlSb.append("refresh_token = ?, ");
-            params.add(token.getRefresh_token());
+            params.add(token.getRefreshToken());
         }
-        if (token.getAccess_token_expiry() != null) {
+        if (token.getAccessTokenExpiry() != null) {
             sqlSb.append("access_token_expiry = ?, ");
-            params.add(token.getAccess_token_expiry());
+            params.add(token.getAccessTokenExpiry());
         }
-        if (token.getRefresh_token_expiry() != null) {
+        if (token.getRefreshTokenExpiry() != null) {
             sqlSb.append("refresh_token_expiry = ?, ");
-            params.add(token.getRefresh_token_expiry());
+            params.add(token.getRefreshTokenExpiry());
         }
         int sqlSbLength = sqlSb.length();
         final String sql =  sqlSb.delete(sqlSbLength - 2, sqlSbLength).toString() + " WHERE token_id = ?";
-        params.add(token.getToken_id());
-
+        params.add(token.getTokenId());
+        
         return jdbcTemplate.update(sql, params.toArray()) > 0;
     }
 
@@ -79,19 +79,19 @@ public class TokenRepositoryImpl implements TokenRepository {
         return (rs, rowNum) -> {
             Token token = Token.builder().build();
             if(sqlColumns.contains("token_id")) {
-                token.setToken_id(rs.getString("token_id"));
+                token.setTokenId(rs.getString("token_id"));
             }
             if (sqlColumns.contains("access_token")) {
-                token.setAccess_token(rs.getString("access_token"));
+                token.setAccessToken(rs.getString("access_token"));
             }
             if(sqlColumns.contains("refresh_token")) {
-                token.setRefresh_token(rs.getString("refresh_token"));
+                token.setRefreshToken(rs.getString("refresh_token"));
             }
             if (sqlColumns.contains("access_token_expiry")) {
-                token.setAccess_token_expiry(rs.getTimestamp("access_token_expiry"));
+                token.setAccessTokenExpiry(rs.getTimestamp("access_token_expiry"));
             }
             if (sqlColumns.contains("refresh_token_expiry")) {
-                token.setRefresh_token_expiry(rs.getTimestamp("refresh_token_expiry"));
+                token.setRefreshTokenExpiry(rs.getTimestamp("refresh_token_expiry"));
             }
             return token;
         };

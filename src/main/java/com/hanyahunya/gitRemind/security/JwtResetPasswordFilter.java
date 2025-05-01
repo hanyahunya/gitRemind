@@ -61,7 +61,7 @@ public class JwtResetPasswordFilter extends OncePerRequestFilter {
             if (email != null) {
                 Boolean added = redisTemplate.opsForValue().setIfAbsent(prefix + resetPasswordToken, "blacklisted", Duration.ofMinutes(5));
                 if (Boolean.TRUE.equals(added)) {
-                    UserPrincipal userPrincipal = new UserPrincipal(null, email);
+                    UserPrincipal userPrincipal = new UserPrincipal(null, null, email);
                     Authentication auth = new UsernamePasswordAuthenticationToken(userPrincipal, null, null);
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }

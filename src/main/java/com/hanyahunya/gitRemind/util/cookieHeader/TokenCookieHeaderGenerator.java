@@ -15,11 +15,15 @@ public class TokenCookieHeaderGenerator {
         HttpHeaders headers = new HttpHeaders();
         if (requestDto.getAccessToken() != null) {
 //            System.out.println(requestDto.getAccessToken());
+            String deleteAccessToken = deleteAccessToken();
+            headers.add(HttpHeaders.SET_COOKIE, deleteAccessToken);
             String accessToken = buildByAccessToken(requestDto.getAccessToken());
             headers.add(HttpHeaders.SET_COOKIE, accessToken);
         }
         if (requestDto.getRefreshToken() != null) {
 //            System.out.println(requestDto.getRefreshToken());
+            String deleteRefreshToken = deleteRefreshToken();
+            headers.add(HttpHeaders.SET_COOKIE, deleteRefreshToken);
             String refreshToken = buildByRefreshToken(requestDto.getRefreshToken());
             headers.add(HttpHeaders.SET_COOKIE, refreshToken);
         }

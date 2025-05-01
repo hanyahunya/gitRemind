@@ -1,5 +1,6 @@
 package com.hanyahunya.gitRemind.member.controller;
 
+import com.hanyahunya.gitRemind.token.service.TokenService;
 import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
 import com.hanyahunya.gitRemind.util.cookieHeader.TokenCookieHeaderGenerator;
 import com.hanyahunya.gitRemind.util.ResponseDto;
@@ -22,6 +23,7 @@ import static com.hanyahunya.gitRemind.util.ResponseUtil.toResponseWithHeader;
 @RequestMapping("/member")
 public class MemberController {
     private final MemberService memberService;
+    private final TokenService tokenService;
     private final TokenCookieHeaderGenerator tokenCookieHeaderGenerator;
 
     @PostMapping("/join")
@@ -39,6 +41,13 @@ public class MemberController {
         } else {
             return toResponse(ResponseDto.fail("ログイン失敗"));
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseDto<Void>> logout(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        SetResultDto setResultDto = tokenService.deleteTokenCurrentDevice(userPrincipal.getTokenId());
+        HttpHeaders headers = tokenCookieHeaderGenerator.handleTokenHeader(setResultDto);
+        return toResponseWithHeader(ResponseDto.success("ログアウト成功"), headers);
     }
 
     @GetMapping("/info")

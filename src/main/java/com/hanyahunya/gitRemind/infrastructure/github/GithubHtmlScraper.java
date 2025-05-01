@@ -19,7 +19,6 @@ public class GithubHtmlScraper {
 
             if (todayTd != null) {
                 String levelStr = todayTd.attr("data-level");
-                System.out.println(levelStr);
                 return Integer.parseInt(levelStr);
             } else {
                 throw new RuntimeException("Today Contribution not found");

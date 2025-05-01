@@ -11,6 +11,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserPrincipal implements UserDetails {
     @Getter
+    private final String tokenId;
+    @Getter
     private final String memberId;
     @Getter
     private final String email;

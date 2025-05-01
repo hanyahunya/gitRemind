@@ -34,6 +34,7 @@ public class PasswordController {
 
     @PostMapping("/change-password")
     public ResponseEntity<ResponseDto<Void>> changePassword(@RequestBody @Valid ChangePwRequestDto changePwRequestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        changePwRequestDto.setTokenId(userPrincipal.getTokenId());
         changePwRequestDto.setMemberId(userPrincipal.getMemberId());
         ResponseDto<Void> responseDto = passwordService.changePassword(changePwRequestDto);
         return toResponse(responseDto);
