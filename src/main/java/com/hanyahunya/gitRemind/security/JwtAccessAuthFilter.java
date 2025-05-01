@@ -63,9 +63,10 @@
             }
 
             String memberId = claims.get("member_id", String.class);
+            String tokenId = claims.get("token_id", String.class);
             if (memberId != null) {
                 // principalにmid登録
-                UserPrincipal userPrincipal = new UserPrincipal(memberId, null);
+                UserPrincipal userPrincipal = new UserPrincipal(tokenId, memberId, null);
                 // spring securityでの確認オブジェクトAuthenticationを作る　new Username~~~(ユーザーの情報、password、権限リスト(Authorities）)
                 Authentication auth = new UsernamePasswordAuthenticationToken(userPrincipal, null, null);
                 SecurityContextHolder.getContext().setAuthentication(auth);

@@ -8,6 +8,8 @@ import lombok.Setter;
 @Getter @Setter
 public class ChangePwRequestDto {
     @JsonIgnore
+    private String tokenId;
+    @JsonIgnore
     private String memberId;
     @NotNull
     private String oldPassword;

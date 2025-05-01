@@ -2,22 +2,21 @@ package com.hanyahunya.gitRemind.token.service;
 
 import com.hanyahunya.gitRemind.contribution.entity.Contribution;
 import com.hanyahunya.gitRemind.contribution.repository.ContributionRepository;
-import com.hanyahunya.gitRemind.infrastructure.email.SendEmailService;
 import com.hanyahunya.gitRemind.token.dto.JwtTokenPairResponseDto;
 import com.hanyahunya.gitRemind.token.entity.Token;
 import com.hanyahunya.gitRemind.token.repository.MemberTokenRepository;
 import com.hanyahunya.gitRemind.token.repository.TokenRepository;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
-import com.hanyahunya.gitRemind.util.cookieHeader.TokenCookieHeaderGenerator;
 import com.hanyahunya.gitRemind.util.service.EncodeService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,24 +34,24 @@ public class TokenServiceImpl implements TokenService {
     @Override
     @Transactional
     public ResponseDto<JwtTokenPairResponseDto> issueTokens(String memberId) {
-        String accessToken = accessTokenService.generateToken(memberId);
-        String token_id = UUID.randomUUID().toString();
-        String refreshToken = refreshTokenService.generateToken(token_id);
+        String tokenId = UUID.randomUUID().toString();
+        String accessToken = accessTokenService.generateToken(memberId, tokenId);
+        String refreshToken = refreshTokenService.generateToken(tokenId);
         Token token = Token.builder()
-                .token_id(token_id)
-                .access_token(accessToken)
-                .refresh_token(refreshToken)
+                .tokenId(tokenId)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
         addAccessExpiry(token);
         addRefreshExpiry(token);
-        token.setAccess_token(encodeService.encode(accessToken));
-        token.setRefresh_token(encodeService.encode(refreshToken));
+        token.setAccessToken(encodeService.encode(accessToken));
+        token.setRefreshToken(encodeService.encode(refreshToken));
         JwtTokenPairResponseDto responseDto = JwtTokenPairResponseDto.set(accessToken, refreshToken);
         try{
             if (!tokenRepository.saveToken(token)) {
                 throw new RuntimeException("Token保存失敗");
             }
-            if (!memberTokenRepository.saveMemberToken(memberId, token_id)) {
+            if (!memberTokenRepository.saveMemberToken(memberId, tokenId)) {
                 throw new RuntimeException("Token保存失敗");
             }
         } catch (Exception e) {
@@ -68,12 +67,21 @@ public class TokenServiceImpl implements TokenService {
     @Transactional
     public SetResultDto refreshAccessToken(String oldAccessToken, String refreshToken) {
         try {
-            if (!refreshTokenService.validateToken(refreshToken)) {
-                return null;
-            }
-            String tokenId = refreshTokenService.getClaims(refreshToken).get("token_id", String.class);
-//            HttpHeaders headers = new HttpHeaders();
             SetResultDto setResultDto = SetResultDto.builder().build();
+            Claims refreshTokenClaims;
+            try {
+                refreshTokenClaims = refreshTokenService.getClaims(refreshToken);
+            } catch (ExpiredJwtException e) {
+                String tokenId = e.getClaims().get("token_id", String.class);
+                tokenRepository.deleteByTokenId(tokenId);
+                deleteToken(setResultDto);
+                return setResultDto;
+            } catch (Exception e) {
+                deleteToken(setResultDto);
+                return setResultDto;
+            }
+            String tokenId = refreshTokenClaims.get("token_id", String.class);
+//            HttpHeaders headers = new HttpHeaders();
             Optional<Token> optionalToken = tokenRepository.findByTokenId(tokenId);
             if (optionalToken.isEmpty()) {
                 deleteToken(setResultDto);
@@ -81,28 +89,37 @@ public class TokenServiceImpl implements TokenService {
             }
             // アクセストークンの有効期限が切れてないのに更新リクエスト
             Token token = optionalToken.get();
-            String memberId = memberTokenRepository.findMemberIdByTokenId(token.getToken_id());
-            if (!accessTokenService.isTokenExpired(token.getAccess_token_expiry())) {
+            String memberId = memberTokenRepository.findMemberIdByTokenId(token.getTokenId());
+            if (!accessTokenService.isTokenExpired(token.getAccessTokenExpiry())) {
                 sendHijackAlert(memberId);
-                tokenRepository.deleteByTokenId(token.getToken_id());
+                tokenRepository.deleteByTokenId(token.getTokenId());
                 deleteToken(setResultDto);
                 return setResultDto;
             }
             // 当サーバーが以前発行したアクセストークンと一致しない
-            if (!encodeService.matches(oldAccessToken, token.getAccess_token()) || !encodeService.matches(refreshToken, token.getRefresh_token())) {
+            if (!encodeService.matches(oldAccessToken, token.getAccessToken()) || !encodeService.matches(refreshToken, token.getRefreshToken())) {
                 sendHijackAlert(memberId);
-                tokenRepository.deleteByTokenId(token.getToken_id());
+                tokenRepository.deleteByTokenId(token.getTokenId());
                 deleteToken(setResultDto);
                 return setResultDto;
             }
-            String newAccessToken = accessTokenService.generateToken(memberId);
-
+            String newAccessToken = accessTokenService.generateToken(memberId, token.getTokenId());
             Token updatedToken = Token.builder()
-                    .token_id(token.getToken_id())
-                    .access_token(newAccessToken)
+                    .tokenId(token.getTokenId())
+                    .accessToken(newAccessToken)
                     .build();
             addAccessExpiry(updatedToken);
-            updatedToken.setAccess_token(encodeService.encode(newAccessToken));
+            updatedToken.setAccessToken(encodeService.encode(newAccessToken));
+
+            boolean isRefreshTokenShouldRenew = isRefreshTokenExpiringSoon(refreshToken);
+            String newRefreshToken = "";
+            if (isRefreshTokenShouldRenew) {
+                newRefreshToken = refreshTokenService.generateToken(tokenId);
+                updatedToken.setRefreshToken(newRefreshToken);
+                addRefreshExpiry(updatedToken);
+                updatedToken.setRefreshToken(encodeService.encode(newRefreshToken));
+            }
+
             if (!tokenRepository.updateToken(updatedToken)) {
                 setResultDto.setSuccess(false);
                 return setResultDto;
@@ -110,6 +127,10 @@ public class TokenServiceImpl implements TokenService {
 
             setResultDto.setSuccess(true);
             setResultDto.setAccessToken(newAccessToken);
+
+            if (isRefreshTokenShouldRenew) {
+                setResultDto.setRefreshToken(newRefreshToken);
+            }
 
             return setResultDto;
 
@@ -122,11 +143,29 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public ResponseDto<Void> deleteTokenAtAllDevice(String memberId) {
-        if (memberTokenRepository.deleteMemberTokenByMemberId(memberId)) {
+        if (memberTokenRepository.deleteAllByMemberId(memberId)) {
             return ResponseDto.success("すべてのデヴァイスからログアウト成功");
         } else {
             return ResponseDto.fail("すべてのデヴァイスからログアウト失敗");
         }
+    }
+
+    @Override
+    public SetResultDto deleteTokenCurrentDevice(String tokenId) {
+        tokenRepository.deleteByTokenId(tokenId);
+        return SetResultDto.builder().success(true).deleteAccessToken(true).deleteRefreshToken(true).build();
+    }
+
+    @Override
+    public void deleteTokenOtherDevice(String memberId, String tokenId) {
+        memberTokenRepository.deleteAllByMemberIdAndTokenIdNot(memberId, tokenId);
+    }
+
+    private boolean isRefreshTokenExpiringSoon(String refreshToken) {
+        final long THREE_DAYS_MILLIS = 3L * 24 * 60 * 60 * 1000;
+        Date now = new Date();
+        Date expirationDate = refreshTokenService.getClaims(refreshToken).getExpiration();
+        return (expirationDate.getTime() - now.getTime()) < THREE_DAYS_MILLIS;
     }
 
     private void sendHijackAlert(String memberId) {
@@ -134,7 +173,7 @@ public class TokenServiceImpl implements TokenService {
         if (optionalContribution.isPresent()) {
             String email = optionalContribution.get().getEmail();
             String gitUsername = optionalContribution.get().getGitUsername();
-            System.out.println(email + gitUsername);
+//            System.out.println(email + gitUsername);
             securityAlertEmailService.sendCookieHijackingAlert(email, gitUsername);
         }
     }
@@ -146,11 +185,11 @@ public class TokenServiceImpl implements TokenService {
     }
 
     private void addAccessExpiry(Token token) {
-        Claims claims = accessTokenService.getClaims(token.getAccess_token());
-        token.setAccess_token_expiry(claims.getExpiration());
+        Claims claims = accessTokenService.getClaims(token.getAccessToken());
+        token.setAccessTokenExpiry(claims.getExpiration());
     }
     private void addRefreshExpiry(Token token) {
-        Claims claims = refreshTokenService.getClaims(token.getRefresh_token());
-        token.setRefresh_token_expiry(claims.getExpiration());
+        Claims claims = refreshTokenService.getClaims(token.getRefreshToken());
+        token.setRefreshTokenExpiry(claims.getExpiration());
     }
 }

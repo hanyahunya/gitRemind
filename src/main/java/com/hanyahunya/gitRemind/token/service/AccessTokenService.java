@@ -5,7 +5,7 @@ import io.jsonwebtoken.Claims;
 import java.util.Date;
 
 public interface AccessTokenService {
-    String generateToken(String memberId);
+    String generateToken(String memberId, String tokenId);
 
     boolean validateToken(String token);
 

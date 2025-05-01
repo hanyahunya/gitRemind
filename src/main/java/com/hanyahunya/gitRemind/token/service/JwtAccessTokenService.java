@@ -30,8 +30,9 @@ public class JwtAccessTokenService implements AccessTokenService {
 
 
     @Override
-    public String generateToken(String memberId) {
+    public String generateToken(String memberId, String tokenId) {
         return Jwts.builder()
+                .claim("token_id", tokenId)
                 .claim("member_id", memberId)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))

@@ -1,6 +1,5 @@
 package com.hanyahunya.gitRemind.token.repository;
 
-import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.token.entity.MemberToken;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -34,9 +33,14 @@ public class MemberTokenRepositoryImpl implements MemberTokenRepository {
     }
 
     @Override
-    public boolean deleteMemberTokenByMemberId(String memberId) {
+    public boolean deleteAllByMemberId(String memberId) {
         final String sql = "DELETE FROM member_token WHERE member_id = ?";
-        return jdbcTemplate.update(sql, memberId) >= 0;
+        return jdbcTemplate.update(sql, memberId) > 0;
     }
 
+    @Override
+    public void deleteAllByMemberIdAndTokenIdNot(String memberId, String tokenId) {
+        final String sql = "DELETE FROM member_token WHERE member_id = ? AND token_id != ?";
+        jdbcTemplate.update(sql, memberId, tokenId);
+    }
 }

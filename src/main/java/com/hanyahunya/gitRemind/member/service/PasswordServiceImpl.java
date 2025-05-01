@@ -51,11 +51,8 @@ public class PasswordServiceImpl implements PasswordService {
                         .password(encodeService.encode(requestDto.getNewPassword()))
                         .build();
                 if(memberRepository.updateMember(member)) {
-                    if (tokenService.deleteTokenAtAllDevice(member.getMemberId()).isSuccess()) {
-                        return ResponseDto.success("パスワード修正成功");
-                    } else {
-                        throw new RuntimeException("TokenService.deleteTokenAtAllDevice failed");
-                    }
+                    tokenService.deleteTokenOtherDevice(member.getMemberId(), requestDto.getTokenId());
+                    return ResponseDto.success("パスワード修正成功");
                 }
             }
         }
