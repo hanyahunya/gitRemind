@@ -2,6 +2,7 @@ package com.hanyahunya.gitRemind;
 
 import com.hanyahunya.gitRemind.contribution.repository.ContributionRepository;
 import com.hanyahunya.gitRemind.contribution.repository.ContributionRepositoryImpl;
+import com.hanyahunya.gitRemind.contribution.service.CommitReminderEmailService;
 import com.hanyahunya.gitRemind.contribution.service.ContributionService;
 import com.hanyahunya.gitRemind.contribution.service.ContributionServiceImpl;
 import com.hanyahunya.gitRemind.contribution.service.SchedulerService;
@@ -99,7 +100,7 @@ public class AppConfig {
     }
     @Bean
     public SecurityAlertEmailService securityAlertEmailService() {
-        return new SecurityAlertEmailService(sendEmailService());
+        return new SecurityAlertEmailService(sendEmailService(), memberRepository());
     }
     @Bean
     public TokenRepository tokenRepository() {
@@ -122,7 +123,11 @@ public class AppConfig {
     }
     @Bean
     public SchedulerService schedulerService() {
-        return new SchedulerService(contributionRepository(), sendEmailService(), githubHtmlScraper());
+        return new SchedulerService(contributionRepository(), githubHtmlScraper(), commitReminderEmailService());
+    }
+    @Bean
+    public CommitReminderEmailService commitReminderEmailService() {
+        return new CommitReminderEmailService(sendEmailService(), memberRepository());
     }
     // ここまでcontributionパッケージ
 }

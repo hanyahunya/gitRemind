@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>セキュリティ通知</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+<div style="background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+    <h2 th:text="${name} + 'さん、アカウントセキュリティ通知です。'"></h2>
+    <p>
+        アカウントで不審な活動が検出され、<strong>問題のあったデバイスのみがログアウト処理</strong>されました。
+    </p>
+    <p>
+        もしご本人ではない場合は、すぐにパスワードを変更してください。
+    </p>
+    <br/>
+    <p style="color: #999999; font-size: 12px;">
+        このメールはシステムにより自動的に送信されました。
+    </p>
+</div>
+</body>
+</html>

@@ -11,7 +11,7 @@ public interface MemberRepository {
 
     Optional<Member> findMemberByEmail(String email);
 
-    Optional<Member> validateMember(Member member);
+    Optional<Member> findMemberByLoginId(Member member);
 
     boolean updateMember(Member member);
 

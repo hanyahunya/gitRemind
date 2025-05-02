@@ -10,11 +10,10 @@ import java.time.LocalDate;
 @Slf4j
 public class GithubHtmlScraper {
     public int getTodayContributionCount(String gitUsername) {
-        String url = "https://github.com/users/" + gitUsername + "/contributions";
+        String today = LocalDate.now().toString();
+        String url = "https://github.com/users/" + gitUsername + "/contributions?to=" + today;
         try {
             Document doc = Jsoup.connect(url).timeout(10000).get();
-            String today = LocalDate.now().toString();
-
             Element todayTd = doc.select("td[data-date=\"" + today + "\"]").first();
 
             if (todayTd != null) {

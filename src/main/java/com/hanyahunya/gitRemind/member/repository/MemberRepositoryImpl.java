@@ -19,7 +19,7 @@ public class MemberRepositoryImpl implements  MemberRepository{
 
     @Override
     public boolean saveMember(Member member) {
-        final String sql = "INSERT INTO member(member_id, login_id, password, email) VALUES (?, ?, ?, ?)";
+        final String sql = "INSERT INTO member(member_id, login_id, password, email, country) VALUES (?, ?, ?, ?, ?)";
         int updated = jdbcTemplate.update(
                 conn -> {
                     PreparedStatement ps = conn.prepareStatement(sql);
@@ -27,6 +27,7 @@ public class MemberRepositoryImpl implements  MemberRepository{
                     ps.setString(2, member.getLoginId());
                     ps.setString(3, member.getPassword());
                     ps.setString(4, member.getEmail());
+                    ps.setString(5, member.getCountry());
                     return ps;
                 });
         return updated > 0;
@@ -41,13 +42,13 @@ public class MemberRepositoryImpl implements  MemberRepository{
 
     @Override
     public Optional<Member> findMemberByEmail(String email) {
-        final String sql = "SELECT member_id FROM member WHERE email = ?";
+        final String sql = "SELECT member_id, country FROM member WHERE email = ?";
         List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), email);
         return memberList.stream().findFirst();
     }
 
     @Override
-    public Optional<Member> validateMember(Member member) {
+    public Optional<Member> findMemberByLoginId(Member member) {
         final String sql = "SELECT password, member_id FROM member WHERE login_id = ?";
         List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), member.getLoginId());
         return memberList.stream().findFirst();
@@ -65,6 +66,10 @@ public class MemberRepositoryImpl implements  MemberRepository{
         if (member.getPassword() != null) {
             sqlSb.append("password = ?, ");
             parameters.add(member.getPassword());
+        }
+        if (member.getCountry() != null) {
+            sqlSb.append("country = ?, ");
+            parameters.add(member.getCountry());
         }
 
         int columnSbLength = sqlSb.length();
@@ -98,6 +103,9 @@ public class MemberRepositoryImpl implements  MemberRepository{
             }
             if(sqlColumns.contains("email")) {
                 member.setEmail(rs.getString("email"));
+            }
+            if(sqlColumns.contains("country")) {
+                member.setCountry(rs.getString("country"));
             }
             return member;
         };

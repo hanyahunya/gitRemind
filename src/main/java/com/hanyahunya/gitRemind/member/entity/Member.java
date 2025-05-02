@@ -12,4 +12,5 @@ public class Member {
     private String loginId;
     private String password;
     private String email;
+    private String country; // ISO 3166-1 Alpha-2
 }
