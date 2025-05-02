@@ -36,7 +36,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public SetResultDto login(LoginRequestDto loginRequestDto) {
-        Optional<Member> optionalMember = memberRepository.validateMember(loginRequestDto.dtoToEntity());
+        Optional<Member> optionalMember = memberRepository.findMemberByLoginId(loginRequestDto.dtoToEntity());
         if (optionalMember.isPresent()) {
             String reqPw = loginRequestDto.getPassword();
             Member member = optionalMember.get();
@@ -61,7 +61,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public SetResultDto deleteMember(DeleteMemberRequestDto requestDto) {
-        Optional<Member> optionalMember = memberRepository.validateMember(requestDto.toEntity());
+        Optional<Member> optionalMember = memberRepository.findMemberByLoginId(requestDto.toEntity());
         if (optionalMember.isPresent()) {
             Member dbMember = optionalMember.get();
             if (encodeService.matches(requestDto.getPassword(), dbMember.getPassword())) {
@@ -75,11 +75,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public ResponseDto<Void> updateMember(UpdateMemberRequestDto requestDto) {
-        Optional<Member> optionalMember = memberRepository.validateMember(requestDto.toEntity());
+        Optional<Member> optionalMember = memberRepository.findMemberByLoginId(requestDto.toEntity());
         if (optionalMember.isPresent()) {
             Member dbMember = optionalMember.get();
             if (encodeService.matches(requestDto.getPassword(), dbMember.getPassword())) {
-                requestDto.setPassword(null);
                 if (memberRepository.updateMember(requestDto.toEntity())) {
                     return ResponseDto.success("ユーザー情報更新成功");
                 }

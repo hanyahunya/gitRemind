@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Security Alert</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+<div style="background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+    <h2 th:text="${name} + ', your account security alert.'"></h2>
+    <p>
+        Suspicious activity was detected on your account, and <strong>only the affected device has been logged out</strong>.
+    </p>
+    <p>
+        If this wasn't you, please change your password immediately.
+    </p>
+    <br/>
+    <p style="color: #999999; font-size: 12px;">
+        This email was sent automatically by the system.
+    </p>
+</div>
+</body>
+</html>

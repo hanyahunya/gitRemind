@@ -12,13 +12,14 @@ public class UpdateMemberRequestDto {
     private String loginId;
     private String password;
     private String email;
+    private String country;
 
     public Member toEntity() {
         return Member.builder()
                 .memberId(memberId)
                 .loginId(loginId)
-                .password(password)
                 .email(email)
+                .country(country)
                 .build();
     }
 }
