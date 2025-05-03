@@ -45,7 +45,6 @@ public class ContributionRepositoryImpl implements ContributionRepository {
         if (contribution.getCommitted() != null) {
             sqlSb.append("is_today_committed = ?, ");
             parameters.add(contribution.getCommitted());
-            parameters.add(contribution.getCommitted());
         }
         int sbLength = sqlSb.length();
         final String sql = sqlSb.delete(sbLength - 2, sbLength).toString() + " WHERE member_id = ?";
@@ -59,6 +58,12 @@ public class ContributionRepositoryImpl implements ContributionRepository {
     public List<Contribution> findAllContributions() {
         final String sql = "SELECT member_id, email, git_username, alarm_hour_bit, is_today_committed FROM member WHERE is_today_committed = false AND git_username is not null";
         return jdbcTemplate.query(sql, contributionRowMapper(sql));
+    }
+
+    @Override
+    public void resetIsTodayCommitted() {
+        final String sql = "UPDATE member SET is_today_committed = 0";
+        jdbcTemplate.update(sql);
     }
 
     private RowMapper<Contribution> contributionRowMapper(String sql) {

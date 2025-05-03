@@ -23,6 +23,11 @@ public class SchedulerService {
     private final GithubHtmlScraper githubHtmlScraper;
     private final CommitReminderEmailService commitReminderEmailService;
 
+    @Scheduled(cron = "0 0 0 * * *")
+    private void resetCommitted() {
+        contributionRepository.resetIsTodayCommitted();
+    }
+
     /**
      * cron表現式
      * “秒、分、時、日、月、曜日(MON,THU,WED...or MON-FRI)”
@@ -52,6 +57,7 @@ public class SchedulerService {
                         }
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                     log.warn("{}-{}", this.getClass().getSimpleName(), e.getClass().getSimpleName());
                 }
                 log.info("Thread {} finishid", threadName);

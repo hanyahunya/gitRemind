@@ -1,6 +1,7 @@
 package com.hanyahunya.gitRemind.security;
 
 import com.hanyahunya.gitRemind.token.service.PwTokenService;
+import com.hanyahunya.gitRemind.token.service.TokenPurpose;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,7 +21,7 @@ import java.time.Duration;
 
 @Component
 @RequiredArgsConstructor
-public class JwtResetPasswordFilter extends OncePerRequestFilter {
+public class EmailVerificationFilter extends OncePerRequestFilter {
     private final StringRedisTemplate redisTemplate;
     private final PwTokenService pwTokenService;
 
@@ -29,44 +30,63 @@ public class JwtResetPasswordFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();
 
-        if (!uri.startsWith("/member/reset-password")) {
+        if (!uri.startsWith("/member/reset-password") && !uri.startsWith("/member/join")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String resetPasswordToken = null;
+        String emailVerificationToken = null;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("reset_password_token")) {
                     resetPasswordToken = cookie.getValue();
+                } else if (cookie.getName().equals("email_verification_token")) {
+                    emailVerificationToken = cookie.getValue();
                 }
             }
         }
-        if (resetPasswordToken == null) {
+        if (resetPasswordToken == null && emailVerificationToken == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
-        Claims claims;
+        Claims claims = null;
         try {
-            claims = pwTokenService.getClaims(resetPasswordToken);
+            if (resetPasswordToken != null) {
+                claims = pwTokenService.getClaims(resetPasswordToken);
+            }
+            if (emailVerificationToken != null) {
+                claims = pwTokenService.getClaims(emailVerificationToken);
+            }
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        String prefix = "blacklist:";
-        if (!redisTemplate.hasKey(prefix + resetPasswordToken) || pwTokenService.validateToken(resetPasswordToken)) {
-            String email = claims.get("email", String.class);
-            if (email != null) {
-                Boolean added = redisTemplate.opsForValue().setIfAbsent(prefix + resetPasswordToken, "blacklisted", Duration.ofMinutes(5));
-                if (Boolean.TRUE.equals(added)) {
-                    UserPrincipal userPrincipal = new UserPrincipal(null, null, email);
-                    Authentication auth = new UsernamePasswordAuthenticationToken(userPrincipal, null, null);
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                }
-            }
+        String purpose = claims.get("purpose", String.class);
+        String email = claims.get("email", String.class);
+
+        if (uri.startsWith("/member/reset-password") && purpose.equals(TokenPurpose.RESET_PASSWORD.name().toLowerCase())) {
+            verifyAndAuthenticate(resetPasswordToken, email);
+        }
+        if (uri.startsWith("/member/join") && purpose.equals(TokenPurpose.EMAIL_VERIFICATION.name().toLowerCase())) {
+            verifyAndAuthenticate(emailVerificationToken, email);
         }
         filterChain.doFilter(request, response);
     }
+
+    private void verifyAndAuthenticate(String token, String email) {
+        String prefix = "blacklist:";
+        if (!redisTemplate.hasKey(prefix + token)) {
+             Boolean added = redisTemplate.opsForValue().setIfAbsent(prefix + token, "blacklisted", Duration.ofMinutes(5));
+             if (Boolean.TRUE.equals(added)) {
+                 UserPrincipal userPrincipal = new UserPrincipal(null, null, email);
+                 Authentication auth = new UsernamePasswordAuthenticationToken(userPrincipal, null, null);
+                 SecurityContextHolder.getContext().setAuthentication(auth);
+            }
+        }
+    }
+
+
 }

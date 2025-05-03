@@ -11,7 +11,6 @@ public interface MemberService {
      * @return JwtResponseDto.token(String)
      */
     ResponseDto<Void> join(JoinRequestDto joinRequestDto);
-    // todo(04.21) delete member / update memberInfo
 
     /**
      * @param loginRequestDto loginId,pw必須

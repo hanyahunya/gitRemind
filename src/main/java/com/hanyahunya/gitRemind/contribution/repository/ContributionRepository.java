@@ -16,4 +16,6 @@ public interface ContributionRepository {
 
     // !!! for Scheduler dont use スケジューラ以外では使わない !!!
     List<Contribution> findAllContributions();
-}
+
+    void resetIsTodayCommitted();
+    }
