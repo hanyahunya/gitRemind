@@ -17,7 +17,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAccessAuthFilter jwtAccessAuthFilter;
-    private final JwtResetPasswordFilter jwtResetPasswordFilter;
+    private final EmailVerificationFilter emailVerificationFilter;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS設定適用
                 .csrf(AbstractHttpConfigurer::disable) // CSRF保護未使用
                 .addFilterBefore(jwtAccessAuthFilter, UsernamePasswordAuthenticationFilter.class) // JWT追加
-                .addFilterBefore(jwtResetPasswordFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(emailVerificationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -1,7 +1,7 @@
 package com.hanyahunya.gitRemind.member.controller;
 
-import com.hanyahunya.gitRemind.member.dto.JwtResponseDto;
 import com.hanyahunya.gitRemind.token.service.PwTokenService;
+import com.hanyahunya.gitRemind.token.service.TokenPurpose;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.dto.EmailRequestDto;
 import com.hanyahunya.gitRemind.member.dto.ValidateCodeRequestDto;
@@ -32,29 +32,40 @@ public class AuthCodeController {
 
     @PostMapping
     public ResponseEntity<ResponseDto<Void>> send(@RequestBody @Valid EmailRequestDto emailRequestDto) {
-        ResponseDto<Void> responseDto = authCodeService.sendAuthCode(emailRequestDto);
+        ResponseDto<Void> responseDto = authCodeService.sendAuthCode(emailRequestDto, TokenPurpose.EMAIL_VERIFICATION);
         return toResponse(responseDto);
     }
 
     @PostMapping("/validate")
     public ResponseEntity<ResponseDto<Void>> validate(@RequestBody @Valid ValidateCodeRequestDto validateCodeRequestDto) {
-        ResponseDto<Void> responseDto = authCodeService.validateAuthCode(validateCodeRequestDto);
+        if (authCodeService.validateAuthCode(validateCodeRequestDto, TokenPurpose.EMAIL_VERIFICATION).isSuccess()) {
+            String token = pwTokenService.generateToken(validateCodeRequestDto.getEmail(), TokenPurpose.EMAIL_VERIFICATION);
+            HttpHeaders headers = buildTokenCookieHeader("email_verification_token", token);
+            return toResponseWithHeader(ResponseDto.success("メール認証確認トークン発行成功"), headers);
+        } else {
+            return toResponse(ResponseDto.fail("メール認証確認トークン発行失敗"));
+        }
+    }
+
+    @PostMapping("/password-code")
+    public ResponseEntity<ResponseDto<Void>> sendPasswordCode(@RequestBody @Valid EmailRequestDto emailRequestDto) {
+        ResponseDto<Void> responseDto = authCodeService.sendAuthCode(emailRequestDto, TokenPurpose.RESET_PASSWORD);
         return toResponse(responseDto);
     }
 
     @PostMapping("/validate/password-code")
     public ResponseEntity<ResponseDto<Void>> validatePwCode(@RequestBody @Valid ValidateCodeRequestDto validateCodeRequestDto) {
-        if (authCodeService.validateAuthCode(validateCodeRequestDto).isSuccess()) {
-            String token = pwTokenService.generateToken(validateCodeRequestDto.getEmail());
-            HttpHeaders headers = buildTokenCookieHeader(token);
+        if (authCodeService.validateAuthCode(validateCodeRequestDto, TokenPurpose.RESET_PASSWORD).isSuccess()) {
+            String token = pwTokenService.generateToken(validateCodeRequestDto.getEmail(), TokenPurpose.RESET_PASSWORD);
+            HttpHeaders headers = buildTokenCookieHeader("reset_password_token", token);
             return toResponseWithHeader(ResponseDto.success("パスワード更新用トークン発行成功"), headers);
         } else {
             return toResponse(ResponseDto.fail("パスワード更新用トークン発行失敗"));
         }
     }
 
-    private HttpHeaders buildTokenCookieHeader(String token) {
-        Cookie cookie = new Cookie("reset_password_token", token);
+    private HttpHeaders buildTokenCookieHeader(String tokenName, String token) {
+        Cookie cookie = new Cookie(tokenName, token);
         cookie.setPath("/");
         cookie.setMaxAge((int) (expirationTime / 1000));
         String format = String.format(

@@ -1,6 +1,7 @@
 package com.hanyahunya.gitRemind.token.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -24,10 +25,10 @@ public class JwtPwTokenService implements PwTokenService {
     private long expirationTime;
 
     @Override
-    public String generateToken(String email) {
+    public String generateToken(String email, TokenPurpose purpose) {
         return Jwts.builder()
-                .claim("purpose", "password_reset")
                 .claim("email", email)
+                .claim("purpose", purpose.name().toLowerCase())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key)

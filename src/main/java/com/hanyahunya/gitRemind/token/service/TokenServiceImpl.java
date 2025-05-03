@@ -62,7 +62,6 @@ public class TokenServiceImpl implements TokenService {
     }
 
 
-    // todo (04.28) トークンの盗難が疑われる場合、[セキュリティ上の問題により、このアカウントはログアウトされました]のようなメールをユーザーに送る
     @Override
     @Transactional
     public SetResultDto refreshAccessToken(String oldAccessToken, String refreshToken) {

@@ -1,6 +1,5 @@
 package com.hanyahunya.gitRemind.token;
 
-import com.hanyahunya.gitRemind.token.service.RefreshTokenService;
 import com.hanyahunya.gitRemind.token.service.TokenService;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;

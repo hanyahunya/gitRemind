@@ -1,5 +1,6 @@
 package com.hanyahunya.gitRemind.member.service;
 
+import com.hanyahunya.gitRemind.token.service.TokenPurpose;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.infrastructure.email.SendEmailService;
 import com.hanyahunya.gitRemind.member.dto.EmailRequestDto;
@@ -33,7 +34,7 @@ public class AuthCodeServiceImpl implements AuthCodeService {
     }
 
     @Override
-    public ResponseDto<Void> sendAuthCode(EmailRequestDto emailRequestDto) {
+    public ResponseDto<Void> sendAuthCode(EmailRequestDto emailRequestDto, TokenPurpose tokenPurpose) {
         String email = emailRequestDto.getEmail();
 
         // スケジューラがない場合、スレッドを作る　+　原子単位のBooleanでシンクロを合わせる
@@ -42,11 +43,11 @@ public class AuthCodeServiceImpl implements AuthCodeService {
         }
 
         String authCode = String.valueOf(random.nextInt(900000) + 100000);
-        authCodeMap.put(email, authCode);
+        authCodeMap.put((email + tokenPurpose), authCode);
 
         //　3分後に実行されるスケジュールを作る（最後のemailが消されたら、スレッドを停止）
         schedule.schedule(() -> {
-            authCodeMap.remove(email);
+            authCodeMap.remove((email + tokenPurpose));
             if(authCodeMap.isEmpty()) {
                 schedule.shutdown();
                 isSchedulerCreated.set(false);
@@ -65,10 +66,10 @@ public class AuthCodeServiceImpl implements AuthCodeService {
     }
 
     @Override
-    public ResponseDto<Void> validateAuthCode(ValidateCodeRequestDto validateCodeRequestDto) {
+    public ResponseDto<Void> validateAuthCode(ValidateCodeRequestDto validateCodeRequestDto, TokenPurpose tokenPurpose) {
         String email = validateCodeRequestDto.getEmail();
         String authCode = validateCodeRequestDto.getAuthCode();
-        boolean equals = authCode.equals(authCodeMap.get(email));
+        boolean equals = authCode.equals(authCodeMap.get(email + tokenPurpose));
         if(equals) {
             authCodeMap.remove(email);
             return ResponseDto.success("認証コード一致");
