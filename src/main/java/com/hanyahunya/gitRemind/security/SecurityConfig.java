@@ -17,7 +17,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAccessAuthFilter jwtAccessAuthFilter;
-    private final EmailVerificationFilter emailVerificationFilter;
+    private final EmailValidateAuthFilter emailValidateAuthFilter;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -35,8 +35,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         final String[] whitelist = {
-                "/member/join", "/member/login",
-                "/auth-code", "/auth-code/validate", "/auth-code/validate/password-code",
+                "/member/login",
+                "/auth-code", "/auth-code/validate", "auth-code/password-code", "/auth-code/validate/password-code",
                 "/refreshAccessToken"
         };
 
@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS設定適用
                 .csrf(AbstractHttpConfigurer::disable) // CSRF保護未使用
                 .addFilterBefore(jwtAccessAuthFilter, UsernamePasswordAuthenticationFilter.class) // JWT追加
-                .addFilterBefore(emailVerificationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(emailValidateAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

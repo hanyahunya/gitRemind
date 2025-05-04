@@ -1,5 +1,6 @@
 package com.hanyahunya.gitRemind.util.cookieHeader;
 
+import com.hanyahunya.gitRemind.token.service.TokenPurpose;
 import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -10,6 +11,8 @@ public class TokenCookieHeaderGenerator {
 //    private long accessTokenExpirationTime;
     @Value("${jwt.refreshToken.expiration}")
     private long refreshTokenExpirationTime;
+    @Value("${jwt.validateToken.expiration}")
+    private long validateTokenExpirationTime;
 
     public HttpHeaders handleTokenHeader(SetResultDto requestDto) {
         HttpHeaders headers = new HttpHeaders();
@@ -27,6 +30,12 @@ public class TokenCookieHeaderGenerator {
             String refreshToken = buildByRefreshToken(requestDto.getRefreshToken());
             headers.add(HttpHeaders.SET_COOKIE, refreshToken);
         }
+        if (requestDto.getValidateToken() != null) {
+            String deleteValidateToken = deleteValidateToken(requestDto.getPurpose());
+            headers.add(HttpHeaders.SET_COOKIE, deleteValidateToken);
+            String validateToken = buildEmailValidateToken(requestDto.getValidateToken(), requestDto.getPurpose());
+            headers.add(HttpHeaders.SET_COOKIE, validateToken);
+        }
         if (requestDto.isDeleteAccessToken()) {
 //            System.out.println("isDeleteAccessToken");
             String deleteAccessToken = deleteAccessToken();
@@ -36,6 +45,10 @@ public class TokenCookieHeaderGenerator {
 //            System.out.println("isDeleteRefreshToken");
             String deleteRefreshToken = deleteRefreshToken();
             headers.add(HttpHeaders.SET_COOKIE, deleteRefreshToken);
+        }
+        if (requestDto.isDeleteValidateToken()) {
+            String deleteValidateToken = deleteValidateToken(requestDto.getPurpose());
+            headers.add(HttpHeaders.SET_COOKIE, deleteValidateToken);
         }
         return headers;
     }
@@ -60,6 +73,15 @@ public class TokenCookieHeaderGenerator {
         return buildCookieHeader(cookie);
     }
 
+    private String buildEmailValidateToken(String validateToken, TokenPurpose purpose) {
+        Cookie cookie= new Cookie((purpose.name().toLowerCase() + "_token"), validateToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge((int) (validateTokenExpirationTime / 1000));
+
+        return buildCookieHeader(cookie);
+    }
+
     // !!! public for AuthFilter !!!
     public String deleteAccessToken() {
         Cookie cookie = new Cookie("access_token", "");
@@ -73,6 +95,16 @@ public class TokenCookieHeaderGenerator {
     // !!! public for AuthFilter !!!
     public String deleteRefreshToken() {
         Cookie cookie = new Cookie("refresh_token", "");
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+
+        return buildCookieHeader(cookie);
+    }
+
+    // !!! public for AuthFilter !!!
+    public String deleteValidateToken(TokenPurpose purpose) {
+        Cookie cookie = new Cookie((purpose.name().toLowerCase() + "_token"), "");
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(0);

@@ -65,7 +65,7 @@ public class AppConfig {
     }
     @Bean
     public AuthCodeService authCodeService() {
-        return new AuthCodeServiceImpl(sendEmailService());
+        return new AuthCodeServiceImpl(sendEmailService(), pwTokenService());
     }
     // ここまでmemberパッケージ
 
@@ -95,8 +95,8 @@ public class AppConfig {
         return new JwtRefreshTokenService();
     }
     @Bean
-    public PwTokenService pwTokenService() {
-        return new JwtPwTokenService();
+    public EmailValidateTokenService pwTokenService() {
+        return new JwtEmailValidateTokenService();
     }
     @Bean
     public SecurityAlertEmailService securityAlertEmailService() {

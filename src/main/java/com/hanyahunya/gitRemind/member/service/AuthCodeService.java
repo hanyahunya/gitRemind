@@ -4,6 +4,7 @@ import com.hanyahunya.gitRemind.token.service.TokenPurpose;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.dto.EmailRequestDto;
 import com.hanyahunya.gitRemind.member.dto.ValidateCodeRequestDto;
+import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
 
 public interface AuthCodeService {
     /**
@@ -15,5 +16,5 @@ public interface AuthCodeService {
      * メールアドレスと認証コードを基づいて認証結果をreturn
      * @param validateCodeRequestDto email, authCode必須
      */
-    ResponseDto<Void> validateAuthCode(ValidateCodeRequestDto validateCodeRequestDto, TokenPurpose tokenPurpose);
+    SetResultDto validateAuthCode(ValidateCodeRequestDto validateCodeRequestDto, TokenPurpose tokenPurpose);
 }

@@ -1,7 +1,6 @@
 package com.hanyahunya.gitRemind.token.service;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -10,8 +9,8 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-public class JwtPwTokenService implements PwTokenService {
-    @Value("${jwt.pwToken.secret}")
+public class JwtEmailValidateTokenService implements EmailValidateTokenService {
+    @Value("${jwt.validateToken.secret}")
     private String jwtKey;
 
     private SecretKey key;
@@ -21,7 +20,7 @@ public class JwtPwTokenService implements PwTokenService {
         key = Keys.hmacShaKeyFor(jwtKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    @Value("${jwt.pwToken.expiration}")
+    @Value("${jwt.validateToken.expiration}")
     private long expirationTime;
 
     @Override
