@@ -30,11 +30,8 @@ public class PasswordServiceImpl implements PasswordService {
                     .password(resetPwRequestDto.getNewPassword())
                     .build();
             if(memberRepository.updateMember(member)) {
-                if (tokenService.deleteTokenAtAllDevice(member.getMemberId()).isSuccess()) {
-                    return ResponseDto.success("パスワード更新成功");
-                } else {
-                    throw new RuntimeException("TokenService.deleteTokenAtAllDevice failed");
-                }
+                tokenService.deleteTokenAtAllDevice(member.getMemberId());
+                return ResponseDto.success("パスワード更新成功");
             }
         }
         return ResponseDto.fail("パスワード更新失敗");

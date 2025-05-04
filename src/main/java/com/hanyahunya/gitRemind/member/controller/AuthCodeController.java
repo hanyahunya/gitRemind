@@ -1,15 +1,14 @@
 package com.hanyahunya.gitRemind.member.controller;
 
-import com.hanyahunya.gitRemind.token.service.PwTokenService;
 import com.hanyahunya.gitRemind.token.service.TokenPurpose;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.member.dto.EmailRequestDto;
 import com.hanyahunya.gitRemind.member.dto.ValidateCodeRequestDto;
 import com.hanyahunya.gitRemind.member.service.AuthCodeService;
-import jakarta.servlet.http.Cookie;
+import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
+import com.hanyahunya.gitRemind.util.cookieHeader.TokenCookieHeaderGenerator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,10 +24,8 @@ import static com.hanyahunya.gitRemind.util.ResponseUtil.toResponseWithHeader;
 @RequestMapping("/auth-code")
 public class AuthCodeController {
     private final AuthCodeService authCodeService;
-    private final PwTokenService pwTokenService;
+    private final TokenCookieHeaderGenerator tokenCookieHeaderGenerator;
 
-    @Value("${jwt.pwToken.expiration}")
-    private long expirationTime;
 
     @PostMapping
     public ResponseEntity<ResponseDto<Void>> send(@RequestBody @Valid EmailRequestDto emailRequestDto) {
@@ -38,9 +35,9 @@ public class AuthCodeController {
 
     @PostMapping("/validate")
     public ResponseEntity<ResponseDto<Void>> validate(@RequestBody @Valid ValidateCodeRequestDto validateCodeRequestDto) {
-        if (authCodeService.validateAuthCode(validateCodeRequestDto, TokenPurpose.EMAIL_VERIFICATION).isSuccess()) {
-            String token = pwTokenService.generateToken(validateCodeRequestDto.getEmail(), TokenPurpose.EMAIL_VERIFICATION);
-            HttpHeaders headers = buildTokenCookieHeader("email_verification_token", token);
+        SetResultDto setResultDto = authCodeService.validateAuthCode(validateCodeRequestDto, TokenPurpose.EMAIL_VERIFICATION);
+        if (setResultDto.isSuccess()) {
+            HttpHeaders headers = tokenCookieHeaderGenerator.handleTokenHeader(setResultDto);
             return toResponseWithHeader(ResponseDto.success("メール認証確認トークン発行成功"), headers);
         } else {
             return toResponse(ResponseDto.fail("メール認証確認トークン発行失敗"));
@@ -55,29 +52,12 @@ public class AuthCodeController {
 
     @PostMapping("/validate/password-code")
     public ResponseEntity<ResponseDto<Void>> validatePwCode(@RequestBody @Valid ValidateCodeRequestDto validateCodeRequestDto) {
-        if (authCodeService.validateAuthCode(validateCodeRequestDto, TokenPurpose.RESET_PASSWORD).isSuccess()) {
-            String token = pwTokenService.generateToken(validateCodeRequestDto.getEmail(), TokenPurpose.RESET_PASSWORD);
-            HttpHeaders headers = buildTokenCookieHeader("reset_password_token", token);
+        SetResultDto setResultDto = authCodeService.validateAuthCode(validateCodeRequestDto, TokenPurpose.RESET_PASSWORD);
+        if (setResultDto.isSuccess()) {
+            HttpHeaders headers = tokenCookieHeaderGenerator.handleTokenHeader(setResultDto);
             return toResponseWithHeader(ResponseDto.success("パスワード更新用トークン発行成功"), headers);
         } else {
             return toResponse(ResponseDto.fail("パスワード更新用トークン発行失敗"));
         }
     }
-
-    private HttpHeaders buildTokenCookieHeader(String tokenName, String token) {
-        Cookie cookie = new Cookie(tokenName, token);
-        cookie.setPath("/");
-        cookie.setMaxAge((int) (expirationTime / 1000));
-        String format = String.format(
-                "%s=%s; Max-Age=%d; Path=%s; SameSite=Lax; httpOnly;",
-                cookie.getName(),
-                cookie.getValue(),
-                cookie.getMaxAge(),
-                cookie.getPath()
-        );
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.SET_COOKIE, format);
-        return headers;
-    }
-
 }

@@ -27,7 +27,8 @@ public class MemberController {
     private final TokenCookieHeaderGenerator tokenCookieHeaderGenerator;
 
     @PostMapping("/join")
-    public ResponseEntity<ResponseDto<Void>> join(@RequestBody @Valid JoinRequestDto joinRequestDto) {
+    public ResponseEntity<ResponseDto<Void>> join(@RequestBody @Valid JoinRequestDto joinRequestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        joinRequestDto.setEmail(userPrincipal.getEmail());
         ResponseDto<Void> responseDto = memberService.join(joinRequestDto);
         return toResponse(responseDto);
     }

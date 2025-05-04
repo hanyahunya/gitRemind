@@ -1,5 +1,6 @@
 package com.hanyahunya.gitRemind.member.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hanyahunya.gitRemind.member.entity.Member;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -12,7 +13,7 @@ public class JoinRequestDto {
     private String loginId;
     @NotNull
     private String password;
-    @NotNull
+    @JsonIgnore
     private String email;
     private String country;
 

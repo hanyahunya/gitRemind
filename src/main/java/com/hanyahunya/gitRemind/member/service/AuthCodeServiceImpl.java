@@ -1,10 +1,12 @@
 package com.hanyahunya.gitRemind.member.service;
 
+import com.hanyahunya.gitRemind.token.service.EmailValidateTokenService;
 import com.hanyahunya.gitRemind.token.service.TokenPurpose;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.infrastructure.email.SendEmailService;
 import com.hanyahunya.gitRemind.member.dto.EmailRequestDto;
 import com.hanyahunya.gitRemind.member.dto.ValidateCodeRequestDto;
+import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 public class AuthCodeServiceImpl implements AuthCodeService {
     private final SendEmailService sendEmailService;
+    private final EmailValidateTokenService emailValidateTokenService;
 
     // Synchronized Map
     private final Map<String, String> authCodeMap = new ConcurrentHashMap<>();
@@ -57,7 +60,7 @@ public class AuthCodeServiceImpl implements AuthCodeService {
         //　ThymeleafのHtmlにパラメータを入れる
         Map<String, Object> params = new HashMap<>();
         params.put("code", authCode);
-        boolean success = sendEmailService.sendEmail(email, "gitRemind AuthCode", "test", params);
+        boolean success = sendEmailService.sendEmail(email, "gitRemind AuthCode", "kr/test", params);
         if(success) {
             return ResponseDto.success("認証コード発信成功");
         } else {
@@ -66,15 +69,16 @@ public class AuthCodeServiceImpl implements AuthCodeService {
     }
 
     @Override
-    public ResponseDto<Void> validateAuthCode(ValidateCodeRequestDto validateCodeRequestDto, TokenPurpose tokenPurpose) {
+    public SetResultDto validateAuthCode(ValidateCodeRequestDto validateCodeRequestDto, TokenPurpose tokenPurpose) {
         String email = validateCodeRequestDto.getEmail();
         String authCode = validateCodeRequestDto.getAuthCode();
         boolean equals = authCode.equals(authCodeMap.get(email + tokenPurpose));
         if(equals) {
             authCodeMap.remove(email);
-            return ResponseDto.success("認証コード一致");
+            String token = emailValidateTokenService.generateToken(email, tokenPurpose);
+            return SetResultDto.builder().success(true).validateToken(token).purpose(tokenPurpose).build();
         } else {
-            return ResponseDto.fail("認証コード不一致");
+            return SetResultDto.builder().build();
         }
     }
 }
