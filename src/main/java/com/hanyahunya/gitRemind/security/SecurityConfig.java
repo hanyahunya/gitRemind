@@ -36,7 +36,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         final String[] whitelist = {
                 "/member/login",
-                "/auth-code", "/auth-code/validate", "auth-code/password-code", "/auth-code/validate/password-code",
+                "/auth-code", "/auth-code/validate", "/auth-code/password-code", "/auth-code/validate/password-code",
                 "/refreshAccessToken"
         };
 
