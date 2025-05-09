@@ -9,6 +9,7 @@ import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
 import com.hanyahunya.gitRemind.util.service.EncodeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -54,19 +55,28 @@ public class MemberServiceImpl implements MemberService {
     public ResponseDto<MemberInfoResponseDto> getInfo(String memberId) {
         return memberRepository.findMemberByMemberId(memberId)
                 .map(member ->
-                        ResponseDto.success("ユーザー情報ロード成功", MemberInfoResponseDto.set(member.getEmail()))
+                        ResponseDto.success("ユーザー情報ロード成功", MemberInfoResponseDto.set(
+                                member.getEmail(),
+                                member.getCountry()
+                        ))
                 )
                 .orElseGet(() -> ResponseDto.fail("ユーザー情報ロード失敗"));
     }
 
     @Override
+    @Transactional
     public SetResultDto deleteMember(DeleteMemberRequestDto requestDto) {
-        Optional<Member> optionalMember = memberRepository.findMemberByLoginId(requestDto.toEntity());
+        Optional<Member> optionalMember = memberRepository.findMemberByMemberId(requestDto.getMemberId());
         if (optionalMember.isPresent()) {
             Member dbMember = optionalMember.get();
+            if (!requestDto.getLoginId().equals(dbMember.getLoginId())) { // 향후 지울수도 있음 *왜 액세스 토큰을 줬는데 아이디까지 기억하고 있어야 하지?
+                return SetResultDto.builder().build();
+            }
             if (encodeService.matches(requestDto.getPassword(), dbMember.getPassword())) {
                 if(memberRepository.deleteMember(requestDto.toEntity())) {
-                    return SetResultDto.builder().deleteAccessToken(true).deleteRefreshToken(true).build();
+                    if (tokenService.deleteTokenAtAllDevice(requestDto.getMemberId()).isSuccess()) {
+                        return SetResultDto.builder().success(true).deleteAccessToken(true).deleteRefreshToken(true).build();
+                    }
                 }
             }
         }
@@ -79,6 +89,7 @@ public class MemberServiceImpl implements MemberService {
         if (optionalMember.isPresent()) {
             Member dbMember = optionalMember.get();
             if (encodeService.matches(requestDto.getPassword(), dbMember.getPassword())) {
+                requestDto.setPassword(null);
                 if (memberRepository.updateMember(requestDto.toEntity())) {
                     return ResponseDto.success("ユーザー情報更新成功");
                 }

@@ -35,7 +35,7 @@ public class MemberRepositoryImpl implements  MemberRepository{
 
     @Override
     public Optional<Member> findMemberByMemberId(String memberId) {
-        final String sql = "SELECT password, email FROM member WHERE member_id = ?";
+        final String sql = "SELECT login_id, password, email, country FROM member WHERE member_id = ?";
         List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), memberId);
         return memberList.stream().findFirst();
     }
@@ -97,6 +97,9 @@ public class MemberRepositoryImpl implements  MemberRepository{
             Member member = Member.builder().build();
             if(sqlColumns.contains("member_id")) {
                 member.setMemberId(rs.getString("member_id"));
+            }
+            if (sqlColumns.contains("login_id")) {
+                member.setCountry(rs.getString("login_id"));
             }
             if (sqlColumns.contains("password")) {
                 member.setPassword(rs.getString("password"));

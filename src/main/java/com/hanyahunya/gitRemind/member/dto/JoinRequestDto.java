@@ -15,6 +15,7 @@ public class JoinRequestDto {
     private String password;
     @JsonIgnore
     private String email;
+    @NotNull
     private String country;
 
     public Member dtoToEntity() {
