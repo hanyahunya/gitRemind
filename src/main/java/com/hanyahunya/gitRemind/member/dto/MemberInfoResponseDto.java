@@ -8,4 +8,5 @@ import lombok.Getter;
 public class MemberInfoResponseDto {
 //    private String loginId;
     private String email;
+    private String country;
 }
