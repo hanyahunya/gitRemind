@@ -85,10 +85,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public ResponseDto<Void> updateMember(UpdateMemberRequestDto requestDto) {
-        Optional<Member> optionalMember = memberRepository.findMemberByLoginId(requestDto.toEntity());
+        Optional<Member> optionalMember = memberRepository.findMemberByMemberId(requestDto.getMemberId());
         if (optionalMember.isPresent()) {
             Member dbMember = optionalMember.get();
-            if (encodeService.matches(requestDto.getPassword(), dbMember.getPassword())) {
+            if (requestDto.getLoginId().equals(dbMember.getLoginId()) && encodeService.matches(requestDto.getPassword(), dbMember.getPassword())) {
                 requestDto.setPassword(null);
                 if (memberRepository.updateMember(requestDto.toEntity())) {
                     return ResponseDto.success("ユーザー情報更新成功");

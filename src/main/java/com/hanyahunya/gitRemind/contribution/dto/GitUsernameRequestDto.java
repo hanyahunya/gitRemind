@@ -9,13 +9,13 @@ import lombok.Setter;
 @Getter @Setter
 public class GitUsernameRequestDto {
     @JsonIgnore
-    private String mid;
+    private String memberId;
     @NotNull
     private String gitUsername;
 
     public Contribution toEntity() {
         return Contribution.builder()
-                .memberId(mid)
+                .memberId(memberId)
                 .gitUsername(gitUsername)
                 .build();
     }

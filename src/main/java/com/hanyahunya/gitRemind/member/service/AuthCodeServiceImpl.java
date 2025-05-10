@@ -30,7 +30,7 @@ public class AuthCodeServiceImpl implements AuthCodeService {
     private final AtomicBoolean isSchedulerCreated = new AtomicBoolean(false);
     private final SecureRandom random = new SecureRandom();
 
-    @PostConstruct // Line39のNullPointExceptionを防ぐため
+    @PostConstruct // Line44のNullPointExceptionを防ぐため
     public void init() {
         schedule = Executors.newScheduledThreadPool(1);
         schedule.shutdown();

@@ -30,7 +30,7 @@ class MemberServiceImplTest {
     private MemberService memberService;
 
     @BeforeEach
-     void setUp() {
+    void setUp() {
         memberRepository = Mockito.mock(MemberRepository.class);
         tokenService = Mockito.mock(TokenService.class);
         encodeService = Mockito.mock(EncodeService.class);
@@ -213,7 +213,7 @@ class MemberServiceImplTest {
         requestDto.setLoginId("test");
         requestDto.setPassword("rawPassword");
 
-        Member dbMember = Member.builder().password("encodedPassword").email("test@example.com").country("KR").build();
+        Member dbMember = Member.builder().loginId("test").password("encodedPassword").email("test@example.com").country("KR").build();
         when(memberRepository.findMemberByMemberId(eq(uuid))).thenReturn(Optional.of(dbMember));
         when(encodeService.matches("rawPassword", "encodedPassword")).thenReturn(true);
         when(memberRepository.deleteMember(argThat(member ->
@@ -243,9 +243,10 @@ class MemberServiceImplTest {
         String uuid = UUID.randomUUID().toString();
         DeleteMemberRequestDto requestDto = new DeleteMemberRequestDto();
         requestDto.setMemberId(uuid);
+        requestDto.setLoginId("test");
         requestDto.setPassword("wrongPassword");
 
-        Member dbMember = Member.builder().password("encodedPassword").build();
+        Member dbMember = Member.builder().loginId("test").password("encodedPassword").build();
         when(memberRepository.findMemberByMemberId(eq(uuid))).thenReturn(Optional.of(dbMember));
         when(encodeService.matches("wrongPassword", "encodedPassword")).thenReturn(false);
 
@@ -270,9 +271,8 @@ class MemberServiceImplTest {
         requestDto.setEmail("newEmail@example.com");
         requestDto.setCountry("KR");
 
-        Member dbMember = Member.builder().memberId(uuid).password("encodedPassword").build();
-        when(memberRepository.findMemberByLoginId(argThat(member -> member.getLoginId().equals("test"))))
-                .thenReturn(Optional.of(dbMember));
+        Member dbMember = Member.builder().loginId("test").password("encodedPassword").email("test@example.com").build();
+        when(memberRepository.findMemberByMemberId(eq(uuid))).thenReturn(Optional.of(dbMember));
         when(encodeService.matches("rawPassword", "encodedPassword")).thenReturn(true);
         when(memberRepository.updateMember(argThat(member ->
                         member.getMemberId().equals(uuid) &&
@@ -288,7 +288,7 @@ class MemberServiceImplTest {
         assertTrue(response.isSuccess());
         assertEquals("ユーザー情報更新成功", response.getMessage());
 
-        verify(memberRepository).findMemberByLoginId(argThat(member -> member.getLoginId().equals("test")));
+        verify(memberRepository).findMemberByMemberId(eq(uuid));
         verify(encodeService).matches("rawPassword", "encodedPassword");
         verify(memberRepository).updateMember(argThat(member ->
                 member.getMemberId().equals(uuid) &&

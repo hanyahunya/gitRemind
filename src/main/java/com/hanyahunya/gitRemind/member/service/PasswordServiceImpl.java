@@ -24,9 +24,8 @@ public class PasswordServiceImpl implements PasswordService {
         resetPwRequestDto.setNewPassword(encodeService.encode(resetPwRequestDto.getNewPassword()));
         Optional<Member> optionalMember = memberRepository.findMemberByEmail(resetPwRequestDto.getEmail());
         if(optionalMember.isPresent()) {
-            Member dbMember = optionalMember.get();
             Member member = Member.builder()
-                    .memberId(dbMember.getMemberId())
+                    .memberId(optionalMember.get().getMemberId())
                     .password(resetPwRequestDto.getNewPassword())
                     .build();
             if(memberRepository.updateMember(member)) {
