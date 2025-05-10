@@ -1,5 +1,6 @@
 package com.hanyahunya.gitRemind.contribution.util;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -17,7 +18,7 @@ public class AlarmTimeBitConverter {
         return activeHours;
     }
 
-    public static int hourToBit(List<Integer> hours) {
+    public static int hourToBit(Collection<Integer> hours) {
         int alarmBitValue = 0;
 
         for (int hour : hours) {

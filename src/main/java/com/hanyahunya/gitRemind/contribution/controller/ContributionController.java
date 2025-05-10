@@ -23,7 +23,7 @@ public class ContributionController {
 
     @PutMapping("/git-username")
     public ResponseEntity<ResponseDto<Void>> saveOrUpdateGitUsername(@RequestBody @Valid GitUsernameRequestDto requestDto, @AuthenticationPrincipal UserPrincipal user) {
-        requestDto.setMid(user.getMemberId());
+        requestDto.setMemberId(user.getMemberId());
         ResponseDto<Void> responseDto = contributionService.saveOrUpdateGitUsername(requestDto);
         return toResponse(responseDto);
     }
