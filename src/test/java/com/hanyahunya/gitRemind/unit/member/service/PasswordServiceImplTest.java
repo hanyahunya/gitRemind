@@ -4,15 +4,16 @@ import com.hanyahunya.gitRemind.member.dto.ChangePwRequestDto;
 import com.hanyahunya.gitRemind.member.dto.ResetPwRequestDto;
 import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
-import com.hanyahunya.gitRemind.member.service.PasswordService;
 import com.hanyahunya.gitRemind.member.service.PasswordServiceImpl;
 import com.hanyahunya.gitRemind.token.service.TokenService;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.util.service.EncodeService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -22,20 +23,16 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class PasswordServiceImplTest {
-    private PasswordService passwordService;
+    @InjectMocks
+    private PasswordServiceImpl passwordService;
+    @Mock
     private MemberRepository memberRepository;
+    @Mock
     private EncodeService encodeService;
+    @Mock
     private TokenService tokenService;
-
-    @BeforeEach
-    void setUp() {
-        memberRepository = Mockito.mock(MemberRepository.class);
-        encodeService = Mockito.mock(EncodeService.class);
-        tokenService = Mockito.mock(TokenService.class);
-
-        passwordService = new PasswordServiceImpl(memberRepository, encodeService, tokenService);
-    }
 
     @Test
     void forgotPassword() {

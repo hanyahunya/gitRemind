@@ -6,16 +6,15 @@ import com.hanyahunya.gitRemind.contribution.dto.CommittedResponseDto;
 import com.hanyahunya.gitRemind.contribution.dto.GitUsernameRequestDto;
 import com.hanyahunya.gitRemind.contribution.entity.Contribution;
 import com.hanyahunya.gitRemind.contribution.repository.ContributionRepository;
-import com.hanyahunya.gitRemind.contribution.service.ContributionService;
 import com.hanyahunya.gitRemind.contribution.service.ContributionServiceImpl;
 import com.hanyahunya.gitRemind.contribution.util.AlarmTimeBitConverter;
-import com.hanyahunya.gitRemind.infrastructure.github.GithubUserValidator;
-import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.util.ResponseDto;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -24,15 +23,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.*;
 
+@ExtendWith(MockitoExtension.class)
 class ContributionServiceImplTest {
-    private ContributionService contributionService;
+    @InjectMocks
+    private ContributionServiceImpl contributionService;
+    @Mock
     private ContributionRepository contributionRepository;
-
-    @BeforeEach
-    void setUp() {
-        contributionRepository = Mockito.mock(ContributionRepository.class);
-        contributionService = new ContributionServiceImpl(contributionRepository);
-    }
 
     @Test
     void saveOrUpdateGitUsername() {

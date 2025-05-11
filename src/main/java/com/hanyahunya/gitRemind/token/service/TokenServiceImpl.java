@@ -134,9 +134,9 @@ public class TokenServiceImpl implements TokenService {
             return setResultDto;
 
         } catch (Exception e) {
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             log.error("{}-{}: {}", this.getClass().getSimpleName(), e.getClass().getSimpleName(), e.getMessage());
-            return null;
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return SetResultDto.builder().build();
         }
     }
 
