@@ -1,5 +1,6 @@
 package com.hanyahunya.gitRemind.unit.token.service;
 
+import com.hanyahunya.gitRemind.contribution.entity.Contribution;
 import com.hanyahunya.gitRemind.contribution.repository.ContributionRepository;
 import com.hanyahunya.gitRemind.token.dto.JwtTokenPairResponseDto;
 import com.hanyahunya.gitRemind.token.entity.Token;
@@ -21,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.security.SignatureException;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -220,6 +222,92 @@ class TokenServiceImplTest {
         assertTrue(response.isDeleteAccessToken());
         assertTrue(response.isDeleteRefreshToken());
 
+        verify(tokenRepository).deleteByTokenId(claimTokenId);
+    }
+    @Test
+    @DisplayName("<refreshAccessToken>DB上のアクセストークンの有効期限が切れてない状態で更新を試みた場合")
+    void refreshAccessTokenFailsWhenAccessTokenNotExpired() {
+        // given
+        String oldAccessToken = "old_access_token";
+        String refreshToken = "refresh_token";
+
+        /* refresh_token_claim_mock */
+        Claims mockRefreshClaims = mock(Claims.class);
+        String claimTokenId = UUID.randomUUID().toString();
+        when(mockRefreshClaims.get("token_id", String.class)).thenReturn(claimTokenId);
+        when(refreshTokenService.getClaims("refresh_token")).thenReturn(mockRefreshClaims);
+
+        Date oldAccessExp = new Date(System.currentTimeMillis() + 1000 * 60 * 5); // +5 min
+        Token dbToken = Token.builder()
+                .tokenId(claimTokenId)
+                .accessToken("encoded_old_access_token")
+                .refreshToken("encoded_refresh_token")
+                .accessTokenExpiry(oldAccessExp)
+                .build();
+        when(tokenRepository.findByTokenId(claimTokenId)).thenReturn(Optional.of(dbToken));
+
+        String memberId = UUID.randomUUID().toString();
+        when(memberTokenRepository.findMemberIdByTokenId(claimTokenId)).thenReturn(memberId);
+        when(accessTokenService.isTokenExpired(oldAccessExp)).thenReturn(false);
+
+        /* sendHijackAlert() */
+        Contribution dbContribution = Contribution.builder().email("test@example.com").gitUsername("hanyahunya").build();
+        when(contributionRepository.getContributionByMemberId(memberId)).thenReturn(Optional.of(dbContribution));
+
+        // when
+        SetResultDto response = tokenService.refreshAccessToken(oldAccessToken, refreshToken);
+
+        // then
+        assertFalse(response.isSuccess());
+        assertTrue(response.isDeleteAccessToken());
+        assertTrue(response.isDeleteRefreshToken());
+
+        verify(securityAlertEmailService).sendCookieHijackingAlert("test@example.com", "hanyahunya");
+        verify(tokenRepository).deleteByTokenId(claimTokenId);
+    }
+    @Test
+    @DisplayName("<refreshAccessToken>当サーバーが以前発行したアクセストークンと一致しない場合")
+    void refreshAccessTokenFailsWhenAccessTokenInvalid() {
+        // given
+        String oldAccessToken = "wrong_old_access_token";
+        String refreshToken = "refresh_token";
+
+        /* refresh_token_claim_mock */
+        Claims mockRefreshClaims = mock(Claims.class);
+        String claimTokenId = UUID.randomUUID().toString();
+        when(mockRefreshClaims.get("token_id", String.class)).thenReturn(claimTokenId);
+        when(refreshTokenService.getClaims("refresh_token")).thenReturn(mockRefreshClaims);
+
+        Date oldAccessExp = new Date(System.currentTimeMillis() - 1000 * 60 * 5); // -5 min
+        Token dbToken = Token.builder()
+                .tokenId(claimTokenId)
+                .accessToken("encoded_old_access_token")
+                .refreshToken("encoded_refresh_token")
+                .accessTokenExpiry(oldAccessExp)
+                .build();
+        when(tokenRepository.findByTokenId(claimTokenId)).thenReturn(Optional.of(dbToken));
+
+        String memberId = UUID.randomUUID().toString();
+        when(memberTokenRepository.findMemberIdByTokenId(claimTokenId)).thenReturn(memberId);
+
+        when(accessTokenService.isTokenExpired(oldAccessExp)).thenReturn(true);
+
+        when(encodeService.matches(oldAccessToken, "encoded_old_access_token")).thenReturn(false);
+//        when(encodeService.matches(refreshToken, "encoded_refresh_token")).thenReturn(true);
+
+        /* sendHijackAlert() */
+        Contribution dbContribution = Contribution.builder().email("test@example.com").gitUsername("hanyahunya").build();
+        when(contributionRepository.getContributionByMemberId(memberId)).thenReturn(Optional.of(dbContribution));
+
+        // when
+        SetResultDto response = tokenService.refreshAccessToken(oldAccessToken, refreshToken);
+
+        // then
+        assertFalse(response.isSuccess());
+        assertTrue(response.isDeleteAccessToken());
+        assertTrue(response.isDeleteRefreshToken());
+
+        verify(securityAlertEmailService).sendCookieHijackingAlert("test@example.com", "hanyahunya");
         verify(tokenRepository).deleteByTokenId(claimTokenId);
     }
 
