@@ -13,6 +13,8 @@ import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
 import com.hanyahunya.gitRemind.util.service.EncodeService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -131,6 +133,94 @@ class TokenServiceImplTest {
         // then
         assertTrue(response.isSuccess());
         assertEquals("new_access_token", response.getAccessToken());
+    }
+    @Test
+    @DisplayName("<refreshAccessToken>リフレッシュトークンの有効期限が3日未満の場合")
+    void refreshAccessTokenWhenRefreshTokenShouldRefresh() {
+        //given
+        String oldAccessToken = "old_access_token";
+        String refreshToken = "refresh_token";
+        /* refresh_token_claim_mock */
+        Claims mockRefreshClaims = mock(Claims.class);
+        String claimTokenId = UUID.randomUUID().toString();
+        Date refreshExp = new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 2); // +2 days
+        when(mockRefreshClaims.get("token_id", String.class)).thenReturn(claimTokenId);
+        when(mockRefreshClaims.getExpiration()).thenReturn(refreshExp);
+        when(refreshTokenService.getClaims("refresh_token")).thenReturn(mockRefreshClaims);
+
+        Date oldAccessExp = new Date(System.currentTimeMillis() - 1000 * 60 * 5); // -5 min
+        Token dbToken = Token.builder()
+                .tokenId(claimTokenId)
+                .accessToken("encoded_old_access_token")
+                .refreshToken("encoded_refresh_token")
+                .accessTokenExpiry(oldAccessExp)
+                .build();
+        when(tokenRepository.findByTokenId(claimTokenId)).thenReturn(Optional.of(dbToken));
+
+        String memberId = UUID.randomUUID().toString();
+        when(memberTokenRepository.findMemberIdByTokenId(claimTokenId)).thenReturn(memberId);
+
+        when(accessTokenService.isTokenExpired(oldAccessExp)).thenReturn(true);
+
+        when(encodeService.matches(oldAccessToken, "encoded_old_access_token")).thenReturn(true);
+        when(encodeService.matches(refreshToken, "encoded_refresh_token")).thenReturn(true);
+
+        when(accessTokenService.generateToken(memberId, claimTokenId)).thenReturn("new_access_token");
+        when(encodeService.encode("new_access_token")).thenReturn("encoded_new_access_token");
+        when(refreshTokenService.generateToken(claimTokenId)).thenReturn("new_refresh_token");
+        when(encodeService.encode("new_refresh_token")).thenReturn("encoded_new_refresh_token");
+
+        /* new_access_token_claim_mock */
+        Claims mockAccessClaims = mock(Claims.class);
+        Date accessExp = new Date(System.currentTimeMillis() + 1000 * 60 * 15); // +15 min
+        when(mockAccessClaims.getExpiration()).thenReturn(accessExp);
+        when(accessTokenService.getClaims("new_access_token")).thenReturn(mockAccessClaims);
+        /* new_refresh_token_claim_mock */
+        Claims mockNewRefreshClaims = mock(Claims.class);
+        Date newRefreshExp = new Date(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 7); // +7 days
+        when(mockNewRefreshClaims.getExpiration()).thenReturn(newRefreshExp);
+        when(refreshTokenService.getClaims("new_refresh_token")).thenReturn(mockNewRefreshClaims);
+
+        when(tokenRepository.updateToken(argThat(token ->
+                token.getTokenId().equals(claimTokenId) &&
+                        token.getAccessToken().equals("encoded_new_access_token") &&
+                        token.getAccessTokenExpiry() == accessExp &&
+                        token.getRefreshToken().equals("encoded_new_refresh_token") &&
+                        token.getRefreshTokenExpiry() == newRefreshExp
+        ))).thenReturn(true);
+
+        // when
+        SetResultDto response = tokenService.refreshAccessToken(oldAccessToken, refreshToken);
+
+        // then
+        assertTrue(response.isSuccess());
+        assertEquals("new_access_token", response.getAccessToken());
+        assertEquals("new_refresh_token", response.getRefreshToken());
+    }
+    @Test
+    @DisplayName("<refreshAccessToken>リフレッシュトークン有効期限切れの場合")
+    void refreshAccessTokenFailsWhenRefreshTokenExpired() {
+        // given
+        String oldAccessToken = "old_access_token";
+        String refreshToken = "refresh_token";
+
+        /* refresh_token_claim_mock */
+        Claims mockRefreshClaims = mock(Claims.class);
+        String claimTokenId = UUID.randomUUID().toString();
+        when(mockRefreshClaims.get("token_id", String.class)).thenReturn(claimTokenId);
+
+        ExpiredJwtException expiredJwtException = new ExpiredJwtException(null, mockRefreshClaims, null);
+        when(refreshTokenService.getClaims("refresh_token")).thenThrow(expiredJwtException);
+
+        // when
+        SetResultDto response = tokenService.refreshAccessToken(oldAccessToken, refreshToken);
+
+        // then
+        assertFalse(response.isSuccess());
+        assertTrue(response.isDeleteAccessToken());
+        assertTrue(response.isDeleteRefreshToken());
+
+        verify(tokenRepository).deleteByTokenId(claimTokenId);
     }
 
     @Test
