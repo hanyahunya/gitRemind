@@ -5,11 +5,11 @@ import com.hanyahunya.gitRemind.member.dto.ResetPwRequestDto;
 import com.hanyahunya.gitRemind.member.entity.Member;
 import com.hanyahunya.gitRemind.member.repository.MemberRepository;
 import com.hanyahunya.gitRemind.member.service.PasswordService;
-import com.hanyahunya.gitRemind.token.entity.Token;
 import com.hanyahunya.gitRemind.token.service.TokenService;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import com.hanyahunya.gitRemind.util.service.EncodeService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -123,5 +123,21 @@ class PasswordServiceImplIT {
         String sql2 = "SELECT COUNT(*) FROM token WHERE token_id = ?";
         Integer rows2 = jdbcTemplate.queryForObject(sql2, Integer.class, token2tokenId);
         assertEquals(0, rows2);
+    }
+    @Test
+    @DisplayName("<changePassword>パスワード不一致からの失敗")
+    void changePasswordFailsWhenPasswordIncorrect() {
+        // given
+        ChangePwRequestDto request = new ChangePwRequestDto();
+        request.setTokenId(token1tokenId);
+        request.setMemberId(defaultMemberId);
+        request.setOldPassword("wrongPassword");
+        request.setNewPassword("newPassword");
+
+        // when
+        ResponseDto<Void> response = passwordService.changePassword(request);
+
+        // then
+        assertFalse(response.isSuccess());
     }
 }
