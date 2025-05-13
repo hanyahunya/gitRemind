@@ -35,7 +35,8 @@ public class AppConfig {
     private final TemplateEngine templateEngine;
 
     @Autowired
-    public AppConfig(DataSource dataSource, JavaMailSender javaMailSender, TemplateEngine templateEngine) {this.dataSource = dataSource;
+    public AppConfig(DataSource dataSource, JavaMailSender javaMailSender, TemplateEngine templateEngine) {
+        this.dataSource = dataSource;
         this.javaMailSender = javaMailSender;
         this.templateEngine = templateEngine;
     }

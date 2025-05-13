@@ -49,7 +49,7 @@ public class MemberRepositoryImpl implements  MemberRepository{
 
     @Override
     public Optional<Member> findMemberByLoginId(Member member) {
-        final String sql = "SELECT password, member_id FROM member WHERE login_id = ?";
+        final String sql = "SELECT member_id, password FROM member WHERE login_id = ?";
         List<Member> memberList = jdbcTemplate.query(sql, memberRowMapper(sql), member.getLoginId());
         return memberList.stream().findFirst();
     }
@@ -99,7 +99,7 @@ public class MemberRepositoryImpl implements  MemberRepository{
                 member.setMemberId(rs.getString("member_id"));
             }
             if (sqlColumns.contains("login_id")) {
-                member.setCountry(rs.getString("login_id"));
+                member.setLoginId(rs.getString("login_id"));
             }
             if (sqlColumns.contains("password")) {
                 member.setPassword(rs.getString("password"));
