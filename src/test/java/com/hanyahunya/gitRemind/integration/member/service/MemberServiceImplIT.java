@@ -17,6 +17,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,6 +41,8 @@ class MemberServiceImplIT {
     private JdbcTemplate jdbcTemplate;
 
     private final String defaultMemberId = UUID.randomUUID().toString();
+    private final String token1tokenId = UUID.randomUUID().toString();
+    private final String token2tokenId = UUID.randomUUID().toString();
 
     @BeforeEach
     void setUp() {
@@ -52,6 +56,29 @@ class MemberServiceImplIT {
                 .build();
         // add default member
         memberRepository.saveMember(defaultMember);
+
+        // ログイン中のデバイス1
+        String sqlToken1 = "INSERT INTO token  VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sqlToken1,
+                token1tokenId,
+                "encoded_access_token",
+                "encoded_refresh_token",
+                new Timestamp(new Date().getTime()),
+                new Timestamp(new Date().getTime())
+        );
+        String sqlMemberToken1 = "INSERT INTO member_token (member_id, token_id) VALUES (?, ?)";
+        jdbcTemplate.update(sqlMemberToken1, defaultMemberId, token1tokenId);
+        // ログイン中のデバイス2
+        String sqlToken2 = "INSERT INTO token  VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sqlToken2,
+                token2tokenId,
+                "encoded_access_token",
+                "encoded_refresh_token",
+                new Timestamp(new Date().getTime()),
+                new Timestamp(new Date().getTime())
+        );
+        String sqlMemberToken2 = "INSERT INTO member_token (member_id, token_id) VALUES (?, ?)";
+        jdbcTemplate.update(sqlMemberToken2, defaultMemberId, token2tokenId);
     }
 
     @Test

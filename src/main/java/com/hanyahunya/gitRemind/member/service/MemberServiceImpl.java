@@ -74,7 +74,8 @@ public class MemberServiceImpl implements MemberService {
             }
             if (encodeService.matches(requestDto.getPassword(), dbMember.getPassword())) {
                 if(memberRepository.deleteMember(requestDto.toEntity())) {
-                    tokenService.deleteTokenAtAllDevice(requestDto.getMemberId()); // 필요시 isSuccess 로 if 감싸기 (test 클래스때문에 지워둠)
+//                    ユーザーがDBから削除されたら、トリガーより繋がられたトークンも削除される。
+//                    if (tokenService.deleteTokenAtAllDevice(requestDto.getMemberId()).isSuccess()) {
                     return SetResultDto.builder().success(true).deleteAccessToken(true).deleteRefreshToken(true).build();
                 }
             }
