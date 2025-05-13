@@ -54,7 +54,7 @@ class ContributionServiceImplTest {
         verify(contributionRepository).updateContribution(any(Contribution.class));
     }
     @Test
-    @DisplayName("<saveOrUpDateGitUsername>")
+    @DisplayName("<saveOrUpDateGitUsername>Githubに該当するユーザーが無かった場合")
     void saveOrUpdateGitUsernameFailsWhenGitUsernameInvalid() {
         // given
         String uuid = UUID.randomUUID().toString();
