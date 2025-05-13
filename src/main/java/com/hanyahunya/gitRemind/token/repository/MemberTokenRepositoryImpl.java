@@ -35,7 +35,8 @@ public class MemberTokenRepositoryImpl implements MemberTokenRepository {
     @Override
     public boolean deleteAllByMemberId(String memberId) {
         final String sql = "DELETE FROM member_token WHERE member_id = ?";
-        return jdbcTemplate.update(sql, memberId) > 0;
+        int updated = jdbcTemplate.update(sql, memberId);
+        return updated > 0;
     }
 
     @Override
