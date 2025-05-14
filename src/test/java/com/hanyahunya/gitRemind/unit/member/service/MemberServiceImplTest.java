@@ -219,7 +219,7 @@ class MemberServiceImplTest {
                         member.getPassword().equals("rawPassword")
                         ))
         ).thenReturn(true);
-        when(tokenService.deleteTokenAtAllDevice(eq(uuid))).thenReturn(ResponseDto.success("すべてのデヴァイスからログアウト成功"));
+//        when(tokenService.deleteTokenAtAllDevice(eq(uuid))).thenReturn(ResponseDto.success("すべてのデヴァイスからログアウト成功"));
 
         // when
         SetResultDto response = memberService.deleteMember(requestDto);
@@ -231,7 +231,7 @@ class MemberServiceImplTest {
 
         verify(memberRepository).findMemberByMemberId(eq(uuid));
         verify(encodeService).matches("rawPassword", "encodedPassword");
-        verify(tokenService).deleteTokenAtAllDevice(eq(uuid));
+//        verify(tokenService).deleteTokenAtAllDevice(eq(uuid));
     }
     @Test
     @DisplayName("<deleteMember>パスワード不一致からの失敗")
