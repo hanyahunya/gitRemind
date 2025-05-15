@@ -142,11 +142,8 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public ResponseDto<Void> deleteTokenAtAllDevice(String memberId) {
-        if (memberTokenRepository.deleteAllByMemberId(memberId)) {
-            return ResponseDto.success("すべてのデヴァイスからログアウト成功");
-        } else {
-            return ResponseDto.fail("すべてのデヴァイスからログアウト失敗");
-        }
+        memberTokenRepository.deleteAllByMemberId(memberId);
+        return ResponseDto.success("すべてのデヴァイスからログアウト成功");
     }
 
     @Override

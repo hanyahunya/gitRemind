@@ -1,10 +1,12 @@
 package com.hanyahunya.gitRemind.token.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.crypto.SecretKey;
@@ -13,6 +15,7 @@ import java.util.Date;
 
 public class JwtAccessTokenService implements AccessTokenService {
 
+    @Setter
     @Value("${jwt.accessToken.secret}")
     private String jwtKey;
 
@@ -23,6 +26,7 @@ public class JwtAccessTokenService implements AccessTokenService {
         key = Keys.hmacShaKeyFor(jwtKey.getBytes(StandardCharsets.UTF_8));
     }
 
+    @Setter // このクラスのインスタンスを作らない限り使えないため、大丈夫そう..
     @Value("${jwt.accessToken.expiration}")
     private long expirationTime;
 
@@ -62,4 +66,13 @@ public class JwtAccessTokenService implements AccessTokenService {
         return expirationDate.before(new Date());
     }
 
+    // for test
+    public Date getExpirationDate(String token) {
+        try {
+            Claims claims = getClaims(token);
+            return claims.getExpiration();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims().getExpiration();
+        }
+    }
 }

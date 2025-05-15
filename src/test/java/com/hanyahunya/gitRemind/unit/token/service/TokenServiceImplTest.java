@@ -315,7 +315,7 @@ class TokenServiceImplTest {
     void deleteTokenAtAllDevice() {
         // given
         String memberId = UUID.randomUUID().toString();
-        when(memberTokenRepository.deleteAllByMemberId(memberId)).thenReturn(true);
+//        when(memberTokenRepository.deleteAllByMemberId(memberId)).thenReturn(true);
 
         // when
         ResponseDto<Void> response = tokenService.deleteTokenAtAllDevice(memberId);
@@ -323,6 +323,8 @@ class TokenServiceImplTest {
         // then
         assertTrue(response.isSuccess());
         assertEquals("すべてのデヴァイスからログアウト成功", response.getMessage());
+
+        verify(memberTokenRepository).deleteAllByMemberId(memberId);
     }
 
     @Test

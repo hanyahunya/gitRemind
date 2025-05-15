@@ -7,7 +7,7 @@ import com.hanyahunya.gitRemind.util.cookieHeader.SetResultDto;
 public interface TokenService {
     ResponseDto<JwtTokenPairResponseDto> issueTokens(String memberId);
 
-    SetResultDto refreshAccessToken(String refreshToken, String oldAccessToken);
+    SetResultDto refreshAccessToken(String oldAccessToken, String refreshToken);
 
     ResponseDto<Void> deleteTokenAtAllDevice(String memberId);
 
