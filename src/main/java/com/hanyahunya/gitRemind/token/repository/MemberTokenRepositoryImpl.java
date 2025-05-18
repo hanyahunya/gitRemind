@@ -1,11 +1,9 @@
 package com.hanyahunya.gitRemind.token.repository;
 
-import com.hanyahunya.gitRemind.token.entity.MemberToken;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
-import java.util.Optional;
 
 public class MemberTokenRepositoryImpl implements MemberTokenRepository {
     private final JdbcTemplate jdbcTemplate;
