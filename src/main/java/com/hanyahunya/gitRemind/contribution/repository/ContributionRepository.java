@@ -10,7 +10,7 @@ public interface ContributionRepository {
 
     Optional<Contribution> getContributionByMemberId(String memberId);
 
-    Optional<Contribution> getContributionByGitUsername(String gitUsername);
+//    Optional<Contribution> getContributionByGitUsername(String gitUsername);
 
     boolean updateContribution(Contribution contribution);
 

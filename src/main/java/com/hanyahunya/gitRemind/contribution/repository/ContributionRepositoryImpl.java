@@ -22,12 +22,12 @@ public class ContributionRepositoryImpl implements ContributionRepository {
         return rows.stream().findAny();
     }
 
-    @Override
-    public Optional<Contribution> getContributionByGitUsername(String gitUsername) {
-        final String sql = "SELECT alarm_hour_bit, is_today_committed FROM member WHERE git_username = ?";
-        List<Contribution> rows = jdbcTemplate.query(sql, contributionRowMapper(sql), gitUsername);
-        return rows.stream().findAny();
-    }
+//    @Override
+//    public Optional<Contribution> getContributionByGitUsername(String gitUsername) {
+//        final String sql = "SELECT alarm_hour_bit, is_today_committed FROM member WHERE git_username = ?";
+//        List<Contribution> rows = jdbcTemplate.query(sql, contributionRowMapper(sql), gitUsername);
+//        return rows.stream().findAny();
+//    }
 
     @Override
     public boolean updateContribution(Contribution contribution) {
