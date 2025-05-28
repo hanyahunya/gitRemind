@@ -3,6 +3,7 @@ package com.hanyahunya.gitRemind.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,7 +23,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("*"); // 許可されたUrl
+        configuration.addAllowedOriginPattern("http://127.0.0.1:5500");// 許可されたUrl
         configuration.addAllowedMethod("*"); // 許可されたメソッド
         configuration.addAllowedHeader("*"); // 許可されたヘッダー
         configuration.setAllowCredentials(true); // クッキーと認証情報を許可
@@ -43,6 +44,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers(whitelist).permitAll() // 認証なしにアクセス可能
                                 .anyRequest().authenticated() // 他のリクエストは認証必要
                 )

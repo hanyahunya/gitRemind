@@ -28,6 +28,10 @@ public class MemberController {
 
     @PostMapping("/join")
     public ResponseEntity<ResponseDto<Void>> join(@RequestBody @Valid JoinRequestDto joinRequestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        System.out.println(joinRequestDto.getCountry());
+        System.out.println(joinRequestDto.getEmail());
+        System.out.println(joinRequestDto.getPassword());
+        System.out.println(joinRequestDto.getLoginId());
         joinRequestDto.setEmail(userPrincipal.getEmail());
         ResponseDto<Void> responseDto = memberService.join(joinRequestDto);
         return toResponse(responseDto);

@@ -74,7 +74,7 @@ public class AuthCodeServiceImpl implements AuthCodeService {
         String authCode = validateCodeRequestDto.getAuthCode();
         boolean equals = authCode.equals(authCodeMap.get(email + tokenPurpose));
         if(equals) {
-            authCodeMap.remove(email);
+            authCodeMap.remove(email + tokenPurpose);
             String token = emailValidateTokenService.generateToken(email, tokenPurpose);
             return SetResultDto.builder().success(true).validateToken(token).purpose(tokenPurpose).build();
         } else {
