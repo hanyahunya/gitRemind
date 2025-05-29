@@ -29,7 +29,7 @@
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
             String uri = request.getRequestURI();
 
-            if (uri.startsWith("/member/reset-password")) {
+            if (uri.startsWith("/member/reset-password") || uri.startsWith("/member/join")) {
                 filterChain.doFilter(request, response);
                 return;
             }

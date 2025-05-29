@@ -27,7 +27,7 @@ public class AuthCodeController {
     private final TokenCookieHeaderGenerator tokenCookieHeaderGenerator;
 
 
-    @PostMapping
+    @PostMapping // todo 이미 있는 이메일인지 확인후 전송 (join에서만 사용할 경우)
     public ResponseEntity<ResponseDto<Void>> send(@RequestBody @Valid EmailRequestDto emailRequestDto) {
         ResponseDto<Void> responseDto = authCodeService.sendAuthCode(emailRequestDto, TokenPurpose.EMAIL_VERIFICATION);
         return toResponse(responseDto);
