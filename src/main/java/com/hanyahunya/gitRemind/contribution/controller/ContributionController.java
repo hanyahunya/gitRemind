@@ -1,9 +1,6 @@
 package com.hanyahunya.gitRemind.contribution.controller;
 
-import com.hanyahunya.gitRemind.contribution.dto.AlarmRequestDto;
-import com.hanyahunya.gitRemind.contribution.dto.AlarmResponseDto;
-import com.hanyahunya.gitRemind.contribution.dto.CommittedResponseDto;
-import com.hanyahunya.gitRemind.contribution.dto.GitUsernameRequestDto;
+import com.hanyahunya.gitRemind.contribution.dto.*;
 import com.hanyahunya.gitRemind.contribution.service.ContributionService;
 import com.hanyahunya.gitRemind.security.UserPrincipal;
 import com.hanyahunya.gitRemind.util.ResponseDto;
@@ -20,6 +17,11 @@ import static com.hanyahunya.gitRemind.util.ResponseUtil.toResponse;
 @RequestMapping("/contributions")
 public class ContributionController {
     private final ContributionService contributionService;
+
+    @GetMapping("/git-username")
+    public ResponseEntity<ResponseDto<GitUsernameResponseDto>> getGitUsername(@AuthenticationPrincipal UserPrincipal user) {
+        return toResponse(contributionService.getGitUsername(user.getMemberId()));
+    }
 
     @PutMapping("/git-username")
     public ResponseEntity<ResponseDto<Void>> saveOrUpdateGitUsername(@RequestBody @Valid GitUsernameRequestDto requestDto, @AuthenticationPrincipal UserPrincipal user) {

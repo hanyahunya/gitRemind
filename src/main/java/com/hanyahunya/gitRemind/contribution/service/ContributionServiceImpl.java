@@ -1,9 +1,6 @@
 package com.hanyahunya.gitRemind.contribution.service;
 
-import com.hanyahunya.gitRemind.contribution.dto.AlarmRequestDto;
-import com.hanyahunya.gitRemind.contribution.dto.AlarmResponseDto;
-import com.hanyahunya.gitRemind.contribution.dto.CommittedResponseDto;
-import com.hanyahunya.gitRemind.contribution.dto.GitUsernameRequestDto;
+import com.hanyahunya.gitRemind.contribution.dto.*;
 import com.hanyahunya.gitRemind.contribution.entity.Contribution;
 import com.hanyahunya.gitRemind.contribution.repository.ContributionRepository;
 import com.hanyahunya.gitRemind.contribution.util.AlarmTimeBitConverter;
@@ -64,6 +61,17 @@ public class ContributionServiceImpl implements ContributionService {
                 })
                 .orElseGet(() -> {
                     return ResponseDto.fail("commit読み込み失敗");
+                });
+    }
+
+    @Override
+    public ResponseDto<GitUsernameResponseDto> getGitUsername(String memberId) {
+        return contributionRepository.getContributionByMemberId(memberId)
+                .map(contribution -> {
+                    return ResponseDto.success("gitユーザ名読み込み成功", GitUsernameResponseDto.set(contribution.getGitUsername()));
+                })
+                .orElseGet(() -> {
+                    return ResponseDto.fail("gitユーザ名読み込み失敗");
                 });
     }
 }
