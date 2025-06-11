@@ -4,6 +4,7 @@ import com.hanyahunya.gitRemind.contribution.dto.*;
 import com.hanyahunya.gitRemind.contribution.entity.Contribution;
 import com.hanyahunya.gitRemind.contribution.repository.ContributionRepository;
 import com.hanyahunya.gitRemind.contribution.util.AlarmTimeBitConverter;
+import com.hanyahunya.gitRemind.infrastructure.github.GithubHtmlScraper;
 import com.hanyahunya.gitRemind.infrastructure.github.GithubUserValidator;
 import com.hanyahunya.gitRemind.util.ResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ContributionServiceImpl implements ContributionService {
     private final ContributionRepository contributionRepository;
+    private final GithubHtmlScraper githubHtmlScraper;
 
     @Override
     public ResponseDto<Void> saveOrUpdateGitUsername(GitUsernameRequestDto requestDto) {
@@ -57,7 +59,16 @@ public class ContributionServiceImpl implements ContributionService {
     public ResponseDto<CommittedResponseDto> getCommitStatus(String memberId) {
         return contributionRepository.getContributionByMemberId(memberId)
                 .map(contribution -> {
-                    return ResponseDto.success("commit読み込み成功", CommittedResponseDto.set(contribution.getCommitted()));
+                    boolean committed = false;
+                    if (contribution.getCommitted()) {
+                        committed = true;
+                    } else {
+                        int todayContributionCount = githubHtmlScraper.getTodayContributionCount(contribution.getGitUsername());
+                        if (todayContributionCount > 0) {
+                            committed = true;
+                        }
+                    }
+                    return ResponseDto.success("commit読み込み成功", CommittedResponseDto.set(committed));
                 })
                 .orElseGet(() -> {
                     return ResponseDto.fail("commit読み込み失敗");

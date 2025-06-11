@@ -120,7 +120,7 @@ public class AppConfig {
     }
     @Bean
     public ContributionService contributionService() {
-        return new ContributionServiceImpl(contributionRepository());
+        return new ContributionServiceImpl(contributionRepository(), githubHtmlScraper());
     }
     @Bean
     public SchedulerService schedulerService() {
