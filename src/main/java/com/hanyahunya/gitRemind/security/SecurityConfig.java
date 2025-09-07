@@ -23,7 +23,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOriginPattern("http://localhost/");// 許可されたUrl
+        configuration.addAllowedOriginPattern("https://hanyahunya.com");// 許可されたUrl
         configuration.addAllowedMethod("*"); // 許可されたメソッド
         configuration.addAllowedHeader("*"); // 許可されたヘッダー
         configuration.setAllowCredentials(true); // クッキーと認証情報を許可
